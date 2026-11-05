@@ -81,7 +81,7 @@ header h1 span{color:#ffcf3f}
 .seg button.on.soldout{background:var(--soldout);color:#fff}
 .seg button.on.none{background:var(--none);color:#fff}
 .slotpick{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
-.slotpick button{border:1px solid var(--line);background:#fff;border-radius:10px;padding:8px 2px;font-weight:800;font-size:14px;line-height:1.2}
+.slotpick button{border:1px solid var(--line);background:#fff;border-radius:10px;padding:10px 2px;font-weight:800;font-size:14px;line-height:1.2}
 .slotpick button small{display:block;font-weight:500;font-size:10px;color:var(--sub)}
 .slotpick button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
 .slotpick button.on small{color:#cbd5e1}
@@ -90,8 +90,8 @@ textarea.txt{resize:vertical;min-height:64px}
 .btn.ghost{background:#fff;color:var(--ink);border:1px solid var(--line)}
 .btn.danger{background:#fff;color:var(--accent);border:1px solid #f3c1c5}
 .lbl{font-size:12px;color:var(--sub);font-weight:700;margin:12px 0 6px}
-.slots{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;align-items:end}
-.slot{text-align:center;font-size:11px;color:var(--sub)}
+.slots{display:grid;grid-template-columns:repeat(12,1fr);gap:3px;align-items:end}
+.slot{text-align:center;font-size:10px;color:var(--sub);white-space:nowrap}
 .slot .bar{height:54px;border-radius:6px;background:#f1f0ec;position:relative;overflow:hidden;margin-bottom:3px}
 .slot .bar i{position:absolute;left:0;right:0;bottom:0;background:var(--stock);border-radius:6px}
 .slot .bar i.so{background:var(--soldout);opacity:.3}
@@ -155,7 +155,7 @@ textarea.txt{resize:vertical;min-height:64px}
       <button class="chip on" data-f="all">すべて</button>
       <button class="chip" data-f="yes">扱いあり</button>
       <button class="chip" data-f="hot">3日以内に在庫あり</button>
-      <button class="chip" data-f="unknown">未確認</button>
+      <button class="chip" data-f="unknown">不明</button>
       <button class="chip" data-f="no">扱いなし</button>
       <button class="chip" data-f="closed">非表示にした店</button>
     </div>
@@ -208,16 +208,14 @@ const CHAINS = {
   family:   {l:'ファミリーマート', s:'ファミマ',   b:'F', c:'#0a9b4a', re:/ファミリーマート|ファミマ|family\s?mart/i},
   ministop: {l:'ミニストップ',    s:'ミニストップ', b:'M', c:'#d99a00', re:/ミニストップ|mini\s?stop/i},
 };
-const SLOTS = [
-  {k:'early',l:'早朝',r:'5–8時',f:5,t:8}, {k:'morning',l:'朝',r:'8–11時',f:8,t:11},
-  {k:'noon',l:'昼',r:'11–14時',f:11,t:14}, {k:'afternoon',l:'午後',r:'14–17時',f:14,t:17},
-  {k:'evening',l:'夕方',r:'17–20時',f:17,t:20}, {k:'night',l:'夜',r:'20–24時',f:20,t:24},
-  {k:'late',l:'深夜',r:'0–5時',f:0,t:5},
-];
+// 2時間刻みの時間帯
+const SLOTS = Array.from({length:12}, (_, i) => ({k:'h' + String(i*2).padStart(2, '0'), f:i*2, t:i*2 + 2, l:`${i*2}〜${i*2 + 2}時`, s:`${i*2}時`}));
 const SLOT = Object.fromEntries(SLOTS.map(s => [s.k, s]));
-const slotOfHour = h => (SLOTS.find(s => h >= s.f && h < s.t) || SLOTS[6]).k;
+const LEGACY_SLOT = {early:'早朝', morning:'朝', noon:'昼', afternoon:'午後', evening:'夕方', night:'夜', late:'深夜'};
+const slotLabel = k => SLOT[k]?.l || LEGACY_SLOT[k] || '';
+const slotOfHour = h => 'h' + pad(Math.floor(h / 2) * 2);
 const RESULTS = {stock:'在庫あり', soldout:'売り切れ', none:'置いてない'};
-const HANDLING = {yes:'扱いあり', no:'扱いなし', unknown:'未確認'};
+const HANDLING = {yes:'扱いあり', no:'扱いなし', unknown:'不明'};
 const WD = '日月火水木金土';
 const PAGE = 80;
 
@@ -385,7 +383,7 @@ function render(){
     $('#list').innerHTML = arr.slice(0, shown).map(s => {
       const c = CHAINS[s.chain], last = sortedLogs(s)[0];
       const sub = last
-        ? `${fmtWhen(last.at)}（${SLOT[last.slot]?.l || ''}） <span class="res ${last.result}">${RESULTS[last.result]}</span>`
+        ? `${fmtWhen(last.at)}（${slotLabel(last.slot)}） <span class="res ${last.result}">${RESULTS[last.result]}</span>`
         : esc(s.memo ? s.memo.slice(0, 40) : (s.addr || ''));
       return `<div class="item" data-id="${esc(s.id)}">
         <div class="badge" style="background:${c.c}">${c.b}</div>
@@ -453,12 +451,14 @@ function renderDetail(){
 
     <div class="sec"><h3>ポケモンカードの扱い</h3>
       <div class="seg" id="segH">${['yes','no','unknown'].map(k => `<button data-k="${k}" class="${k}${s.handling === k ? ' on' : ''}">${HANDLING[k]}</button>`).join('')}</div>
+      ${s.handling !== 'yes' ? '<div class="hint">「扱いあり」を選ぶと、販売時間帯を記録できるようになります。</div>' : ''}
     </div>
 
+    ${s.handling === 'yes' ? `
     <div class="sec"><h3>販売を確認した記録を追加</h3>
       <div class="seg" id="segR">${Object.entries(RESULTS).map(([k, v]) => `<button data-k="${k}" class="${k}${draft.result === k ? ' on' : ''}">${v}</button>`).join('')}</div>
-      <div class="lbl">時間帯</div>
-      <div class="slotpick" id="slotPick">${SLOTS.map(x => `<button data-k="${x.k}" class="${draft.slot === x.k ? 'on' : ''}">${x.l}<small>${x.r}</small></button>`).join('')}</div>
+      <div class="lbl">販売時間帯</div>
+      <div class="slotpick" id="slotPick">${SLOTS.map(x => `<button data-k="${x.k}" class="${draft.slot === x.k ? 'on' : ''}">${x.l}</button>`).join('')}</div>
       <div class="lbl">日時</div>
       <input type="datetime-local" class="txt" id="fAt" value="${localISO(now)}">
       <div class="lbl">メモ</div>
@@ -471,21 +471,22 @@ function renderDetail(){
       <div class="slots">${SLOTS.map(x => { const v = cnt[x.k], tot = v.stock + v.soldout;
         return `<div class="slot${best > 0 && v.stock === best ? ' best' : ''}">
           <div class="bar"><i class="so" style="height:${tot/max*100}%"></i><i style="height:${v.stock/max*100}%"></i></div>
-          <b>${v.stock}</b>${x.l}</div>`; }).join('')}</div>
-      <div class="hint">数字と緑＝在庫ありを見た回数、薄い赤＝売り切れだった回数。${best > 0 ? `<b>${SLOTS.filter(x => cnt[x.k].stock === best).map(x => x.l).join('・')}</b>に在庫を見たことが一番多いです。` : '記録が増えると狙い目の時間帯がわかります。'}</div>
+          <b>${v.stock}</b>${x.s}</div>`; }).join('')}</div>
+      <div class="hint">数字と緑＝在庫ありを見た回数、薄い赤＝売り切れだった回数（目盛りは各時間帯の開始時刻）。${best > 0 ? `<b>${SLOTS.filter(x => cnt[x.k].stock === best).map(x => x.l).join('・')}</b>に在庫を見たことが一番多いです。` : '記録が増えると狙い目の時間帯がわかります。'}</div>
     </div>
+    ` : ''}
 
     <div class="sec"><h3>店舗メモ</h3>
       <textarea class="txt" id="sMemo" placeholder="例：入荷は火・金曜。店員さんに聞けば教えてくれる">${esc(s.memo)}</textarea>
       <div class="hint" id="sMemoHint">入力すると自動で保存されます</div>
     </div>
 
-    <div class="sec"><h3>確認履歴（${logs.length}件）</h3>
+    ${logs.length || s.handling === 'yes' ? `<div class="sec"><h3>確認履歴（${logs.length}件）</h3>
       ${logs.length ? logs.map(l => `<div class="log">
-        <div class="when">${fmtWhen(l.at)}<br>${SLOT[l.slot]?.l || ''}</div>
+        <div class="when">${fmtWhen(l.at)}<br>${slotLabel(l.slot)}</div>
         <div style="min-width:0"><span class="res ${l.result}">${RESULTS[l.result]}</span>${l.memo ? `<div class="memo">${esc(l.memo)}</div>` : ''}</div>
         <button class="del" data-log="${esc(l.id)}" aria-label="削除">×</button></div>`).join('') : '<div class="hint" style="margin:0">まだ記録がありません</div>'}
-    </div>
+    </div>` : ''}
 
     <div class="sec" style="margin-bottom:calc(30px + env(safe-area-inset-bottom))">
       <button class="btn ghost" id="dHide">${s.closed ? 'この店舗を一覧に戻す' : '閉店・重複などで一覧から非表示にする'}</button>
@@ -494,6 +495,7 @@ function renderDetail(){
 
   $('#dBack').onclick = () => closeDetail();
   $('#segH').onclick = e => { const k = e.target.closest('button')?.dataset.k; if (!k) return; updateRec(s.id, r => r.handling = k); renderDetail(); };
+  if (s.handling === 'yes') {
   $('#segR').onclick = e => { const k = e.target.closest('button')?.dataset.k; if (!k) return; draft.result = k;
     [...$('#segR').children].forEach(b => b.classList.toggle('on', b.dataset.k === k)); };
   $('#slotPick').onclick = e => { const k = e.target.closest('button')?.dataset.k; if (!k) return; draft.slot = k;
@@ -504,10 +506,10 @@ function renderDetail(){
     const at = $('#fAt').value || localISO(new Date()), memo = $('#fMemo').value.trim();
     updateRec(s.id, r => {
       r.logs = r.logs || []; r.logs.push({id:uid(), at, slot:draft.slot, result:draft.result, memo});
-      if ((r.handling || 'unknown') === 'unknown' && draft.result !== 'none') r.handling = 'yes';
     });
     renderDetail(); toast('記録しました');
   };
+  }
   let mT;
   $('#sMemo').oninput = e => { clearTimeout(mT); mT = setTimeout(() => { updateRec(s.id, r => r.memo = e.target.value); $('#sMemoHint').textContent = '保存しました'; }, 400); };
   $('#detail').querySelectorAll('.del').forEach(b => b.onclick = () => confirmBox('この記録を削除しますか？', () => {

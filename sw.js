@@ -1,5 +1,5 @@
 // アプリ本体だけをキャッシュ（地図や店舗検索は常にネットから取得）
-const CACHE = 'pokeca-list-v1';
+const CACHE = 'pokeca-list-v2';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './apple-touch-icon.png'];
 
 self.addEventListener('install', e => {
