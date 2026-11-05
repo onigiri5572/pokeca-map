@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>ポケカ取扱いコンビニマップ</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#1d2433">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="ポケカMAP">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<style>
+:root{
+  --bg:#f6f5f1; --card:#fff; --ink:#1d2433; --sub:#667085; --line:#e4e2db;
+  --accent:#e63946; --accent-ink:#fff; --yes:#16a34a; --no:#9ca3af; --unk:#f59e0b;
+  --stock:#16a34a; --soldout:#e63946; --none:#6b7280;
+  --r:12px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;font-family:system-ui,-apple-system,"Hiragino Sans","Noto Sans JP",sans-serif;color:var(--ink);background:var(--bg)}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+body{display:flex;flex-direction:column}
+header{display:flex;align-items:center;gap:8px;padding:calc(8px + env(safe-area-inset-top)) calc(12px + env(safe-area-inset-right)) 8px calc(12px + env(safe-area-inset-left));background:#1d2433;color:#fff;flex:none;z-index:5}
+header h1{font-size:16px;margin:0;font-weight:800;letter-spacing:.02em;white-space:nowrap}
+header h1 span{color:#ffcf3f;margin-left:2px}
+header .actions{margin-left:auto;display:flex;gap:6px}
+.hbtn{border:0;border-radius:10px;padding:8px 11px;background:#2f3a52;color:#fff;font-weight:700;font-size:14px;line-height:1}
+.hbtn.primary{background:var(--accent)}
+.hbtn.on{background:#ffcf3f;color:#1d2433}
+main{flex:1;display:flex;min-height:0;position:relative}
+#map{flex:1;min-width:0;background:#dde3ea}
+#panel{width:390px;flex:none;background:var(--card);border-left:1px solid var(--line);display:flex;flex-direction:column;min-height:0;padding-bottom:env(safe-area-inset-bottom)}
+body{overscroll-behavior:none}
+@media (max-width:760px){
+  main{flex-direction:column}
+  #panel{width:auto;height:46vh;border-left:0;border-top:1px solid var(--line)}
+  #panel.tall{height:72vh}
+  .hide-sm{display:none}
+}
+.view{display:flex;flex-direction:column;min-height:0;flex:1}
+.view[hidden]{display:none}
+.ptop{padding:10px 12px;border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:8px;flex:none}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{border:1px solid var(--line);background:#fff;border-radius:999px;padding:5px 11px;font-size:13px;font-weight:600}
+.chip.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.txt{width:100%;border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:#fff}
+.scroll{overflow:auto;flex:1;min-height:0}
+.item{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-bottom:1px solid var(--line);cursor:pointer}
+.item:hover{background:#faf9f6}
+.item .bd{width:28px;height:28px;border-radius:50%;flex:none;display:grid;place-items:center;color:#fff;font-weight:800;font-size:13px}
+.item .nm{font-weight:700;font-size:14px}
+.item .meta{font-size:12px;color:var(--sub);margin-top:2px}
+.item .right{margin-left:auto;text-align:right;flex:none;font-size:12px;color:var(--sub)}
+.tag{display:inline-block;font-size:11px;font-weight:700;border-radius:6px;padding:2px 6px;color:#fff}
+.tag.yes{background:var(--yes)} .tag.no{background:var(--no)} .tag.unknown{background:#fff;color:var(--unk);border:1px solid var(--unk)}
+.res{font-weight:700}
+.res.stock{color:var(--stock)} .res.soldout{color:var(--soldout)} .res.none{color:var(--none)}
+.empty{padding:24px 16px;color:var(--sub);font-size:14px;line-height:1.7}
+.dhead{padding:12px;border-bottom:1px solid var(--line);flex:none}
+.back{border:0;background:none;color:var(--sub);padding:0;font-size:13px;font-weight:600}
+.dname{font-size:18px;font-weight:800;margin:6px 0 2px;display:flex;gap:8px;align-items:center}
+.daddr{font-size:12px;color:var(--sub)}
+.dlinks{margin-top:6px;font-size:13px;display:flex;gap:12px;flex-wrap:wrap}
+.dlinks a{color:#2563eb;font-weight:600;text-decoration:none}
+.dlinks button{border:0;background:none;padding:0;color:var(--sub);font-size:13px;text-decoration:underline}
+.sec{padding:12px;border-bottom:1px solid var(--line)}
+.sec h3{font-size:13px;margin:0 0 8px;color:var(--sub);font-weight:700}
+.seg{display:flex;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.seg button{flex:1;border:0;background:#fff;padding:9px 4px;font-weight:700;font-size:14px;border-right:1px solid var(--line)}
+.seg button:last-child{border-right:0}
+.seg button.on.yes{background:var(--yes);color:#fff}
+.seg button.on.no{background:var(--no);color:#fff}
+.seg button.on.unknown{background:var(--unk);color:#fff}
+.seg button.on.stock{background:var(--stock);color:#fff}
+.seg button.on.soldout{background:var(--soldout);color:#fff}
+.seg button.on.none{background:var(--none);color:#fff}
+.row{display:flex;gap:8px;margin-bottom:8px}
+.row>*{flex:1;min-width:0}
+textarea.txt{resize:vertical;min-height:58px}
+.btn{border:0;border-radius:10px;padding:10px 14px;font-weight:800;background:var(--ink);color:#fff;width:100%}
+.btn.ghost{background:#fff;color:var(--ink);border:1px solid var(--line)}
+.btn.danger{background:#fff;color:var(--accent);border:1px solid #f3c1c5}
+.slots{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;align-items:end}
+.slot{text-align:center;font-size:11px;color:var(--sub)}
+.slot .bar{height:48px;border-radius:6px;background:#f1f0ec;position:relative;overflow:hidden;margin-bottom:3px}
+.slot .bar i{position:absolute;left:0;right:0;bottom:0;background:var(--stock);border-radius:6px}
+.slot .bar i.so{background:var(--soldout);opacity:.35}
+.slot b{display:block;color:var(--ink);font-size:12px}
+.slot.best b{color:var(--stock)}
+.hint{font-size:12px;color:var(--sub);margin-top:6px;line-height:1.6}
+.log{display:flex;gap:8px;padding:8px 0;border-bottom:1px dashed var(--line);font-size:13px}
+.log:last-child{border-bottom:0}
+.log .when{color:var(--sub);flex:none;width:118px}
+.log .memo{color:var(--ink);margin-top:2px;white-space:pre-wrap;word-break:break-word}
+.log .del{margin-left:auto;border:0;background:none;color:var(--sub);font-size:16px;line-height:1;padding:0 2px;flex:none}
+/* pins */
+.pin{position:relative;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:900;font-size:13px;
+  border:3px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.35);transform-origin:50% 120%;transition:transform .12s;cursor:pointer;margin-bottom:6px}
+.pin::after{content:"";position:absolute;bottom:-9px;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top:6px solid var(--ring,#fff)}
+.pin.h-yes{border-color:var(--yes);--ring:var(--yes)}
+.pin.h-no{border-color:#d1d5db;--ring:#d1d5db;opacity:.55;filter:grayscale(.7)}
+.pin.h-unknown{border-color:#fff;--ring:#fff}
+.pin.sel{transform:scale(1.3);z-index:9}
+.pin .dot{position:absolute;top:-6px;right:-7px;background:var(--accent);color:#fff;font-size:10px;border-radius:999px;padding:1px 4px;border:2px solid #fff;line-height:1.1}
+.me{width:16px;height:16px;border-radius:50%;background:#2563eb;border:3px solid #fff;box-shadow:0 0 0 6px rgba(37,99,235,.2)}
+/* modal */
+#modal{position:fixed;inset:0;background:rgba(15,20,30,.5);display:grid;place-items:center;z-index:50;padding:16px}
+#modal[hidden]{display:none}
+.mbox{background:#fff;border-radius:16px;max-width:520px;width:100%;max-height:90vh;overflow:auto;padding:18px}
+.mbox h2{margin:0 0 10px;font-size:18px}
+.mbox p,.mbox li{font-size:13px;line-height:1.7;color:#344054}
+.mbox ol{padding-left:20px;margin:6px 0}
+.mbox label{display:block;font-size:13px;font-weight:700;margin:12px 0 4px}
+.mbox .btns{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+.mbox .btns .btn{flex:1;min-width:140px}
+.mbox hr{border:0;border-top:1px solid var(--line);margin:16px 0}
+.radio{display:flex;gap:8px}
+.radio label{flex:1;margin:0;border:1px solid var(--line);border-radius:10px;padding:10px;font-weight:600;display:flex;gap:6px;align-items:flex-start;cursor:pointer}
+.radio label small{display:block;font-weight:400;color:var(--sub);font-size:11px}
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);background:#1d2433;color:#fff;padding:10px 16px;border-radius:10px;font-size:14px;opacity:0;pointer-events:none;transition:.2s;z-index:60;max-width:90vw}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+#addBanner{position:absolute;top:10px;left:50%;transform:translateX(-50%);background:#ffcf3f;color:#1d2433;font-weight:700;font-size:13px;padding:8px 14px;border-radius:999px;box-shadow:0 2px 8px rgba(0,0,0,.2);z-index:4}
+#addBanner[hidden]{display:none}
+.leaflet-div-icon{background:none;border:0}
+</style>
+</head>
+<body>
+<header>
+  <h1>ポケカ<span>コンビニマップ</span></h1>
+  <div class="actions">
+    <button class="hbtn primary" id="btnSearch">🔍 周辺のコンビニ<span class="hide-sm">を探す</span></button>
+    <button class="hbtn" id="btnLocate" title="現在地へ移動">◎</button>
+    <button class="hbtn" id="btnAdd" title="地図をタップして店舗を手動で追加">＋</button>
+    <button class="hbtn" id="btnSettings" title="設定・バックアップ">⚙</button>
+  </div>
+</header>
+<main>
+  <div id="map"></div>
+  <div id="addBanner" hidden>地図上の店舗の位置をタップしてください（もう一度＋で中止）</div>
+  <aside id="panel">
+    <section class="view" id="listView">
+      <div class="ptop">
+        <div class="chips" id="filters">
+          <button class="chip on" data-f="all">すべて</button>
+          <button class="chip" data-f="yes">扱いあり</button>
+          <button class="chip" data-f="recent">最近在庫あり</button>
+          <button class="chip" data-f="unknown">未確認</button>
+          <button class="chip" data-f="no">扱いなし</button>
+        </div>
+        <input class="txt" id="q" placeholder="店名・住所・メモで絞り込み">
+      </div>
+      <div class="scroll" id="list"></div>
+    </section>
+    <section class="view" id="detailView" hidden></section>
+  </aside>
+</main>
+<div id="modal" hidden><div class="mbox" id="mbox"></div></div>
+<div id="toast"></div>
+<input type="file" id="importFile" accept="application/json,.json" hidden>
+
+<script>
+(() => {
+'use strict';
+const DATA_KEY = 'pokeca-conbini-map:data:v1';
+const CFG_KEY  = 'pokeca-conbini-map:cfg:v1';
+const DEFAULT_VIEW = {lat:35.681236, lng:139.767125, zoom:16}; // 東京駅
+
+const SLOTS = [
+  {k:'early',     l:'早朝', r:'5–8時',   f:5,  t:8},
+  {k:'morning',   l:'朝',   r:'8–11時',  f:8,  t:11},
+  {k:'noon',      l:'昼',   r:'11–14時', f:11, t:14},
+  {k:'afternoon', l:'午後', r:'14–17時', f:14, t:17},
+  {k:'evening',   l:'夕方', r:'17–20時', f:17, t:20},
+  {k:'night',     l:'夜',   r:'20–24時', f:20, t:24},
+  {k:'late',      l:'深夜', r:'0–5時',   f:0,  t:5},
+];
+const SLOT = Object.fromEntries(SLOTS.map(s => [s.k, s]));
+const slotOfHour = h => (SLOTS.find(s => h >= s.f && h < s.t) || SLOTS[6]).k;
+const RESULTS = {stock:'在庫あり', soldout:'売り切れ', none:'置いてない'};
+const HANDLING = {yes:'扱いあり', no:'扱いなし', unknown:'未確認'};
+const BRANDS = [
+  [/セブン|7-?eleven|seven/i, '7', '#f26f21'],
+  [/ファミリーマート|ファミマ|family\s?mart/i, 'F', '#0a9b4a'],
+  [/ナチュラルローソン|ローソンストア100|ローソン|lawson/i, 'L', '#1a6fc4'],
+  [/ミニストップ|ministop/i, 'M', '#e3a400'],
+  [/デイリーヤマザキ|ヤマザキ|daily/i, 'D', '#d7261e'],
+  [/セイコーマート|seicomart/i, 'S', '#f08a00'],
+  [/newdays|ニューデイズ/i, 'N', '#127a3c'],
+  [/ポプラ|poplar/i, 'P', '#c2410c'],
+];
+const WD = '日月火水木金土';
+
+// ---------- utils ----------
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const load = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v ?? d; } catch { return d; } };
+const store = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch { toast('ブラウザに保存できませんでした'); return false; } };
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+const pad = n => String(n).padStart(2, '0');
+const localISO = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+function fmtWhen(iso){ const d = new Date(iso); if (isNaN(d)) return iso; return `${d.getMonth()+1}/${d.getDate()}(${WD[d.getDay()]}) ${pad(d.getHours())}:${pad(d.getMinutes())}`; }
+function ago(iso){
+  const ms = Date.now() - new Date(iso).getTime(); const h = ms / 36e5;
+  if (h < 1) return 'さっき'; if (h < 24) return `${Math.floor(h)}時間前`;
+  const d = Math.floor(h / 24); return d < 31 ? `${d}日前` : `${Math.floor(d/30)}か月前`;
+}
+function dist(a, b){
+  const R = 6371e3, t = Math.PI/180, dLa = (b.lat-a.lat)*t, dLo = (b.lng-a.lng)*t;
+  const x = Math.sin(dLa/2)**2 + Math.cos(a.lat*t)*Math.cos(b.lat*t)*Math.sin(dLo/2)**2;
+  return 2*R*Math.asin(Math.sqrt(x));
+}
+const fmtDist = m => m < 1000 ? `${Math.round(m)}m` : `${(m/1000).toFixed(1)}km`;
+function brandOf(name){ for (const [re, l, c] of BRANDS) if (re.test(name || '')) return {l, c}; return {l:'C', c:'#6b7280'}; }
+let toastT;
+function toast(msg, ms = 2600){ const t = $('#toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), ms); }
+
+// ---------- data ----------
+let cfg = load(CFG_KEY, {engine:null, key:'', view:null});
+let db = load(DATA_KEY, {version:1, stores:{}});
+if (!db.stores) db.stores = {};
+const found = {};            // 今回の検索で見つかった（まだ記録のない）店舗
+let selectedId = null, filter = 'all', addMode = false, mapA = null;
+
+const allStores = () => { const m = {...found}; Object.assign(m, db.stores); return Object.values(m); };
+const getStore = id => db.stores[id] || found[id];
+const sortedLogs = s => [...(s.logs || [])].sort((a, b) => b.at.localeCompare(a.at));
+const lastStock = s => sortedLogs(s).find(l => l.result === 'stock');
+const isRecent = s => { const l = lastStock(s); return l && (Date.now() - new Date(l.at)) < 3*864e5; };
+const hasData = s => s.handling !== 'unknown' || s.memo || (s.logs && s.logs.length) || s.custom;
+function newStore(p){
+  return {id:p.id, name:p.name || 'コンビニ', lat:p.lat, lng:p.lng, address:p.address || '', placeId:p.placeId || '',
+          handling:'unknown', memo:'', logs:[], custom:!!p.custom, createdAt:Date.now(), updatedAt:Date.now()};
+}
+function commit(s){
+  s.updatedAt = Date.now();
+  if (hasData(s)) db.stores[s.id] = s; else { delete db.stores[s.id]; found[s.id] = s; }
+  store(DATA_KEY, db);
+  mapA && mapA.sync();
+  renderList();
+}
+function mergeFound(list){
+  let added = 0;
+  for (const p of list){
+    const ex = db.stores[p.id];
+    if (ex){ if (!ex.address && p.address) ex.address = p.address; if (!ex.placeId && p.placeId) ex.placeId = p.placeId; continue; }
+    if (!found[p.id]){ found[p.id] = newStore(p); added++; }
+  }
+  return added;
+}
+
+// ---------- pin ----------
+function pinHTML(s){
+  const b = brandOf(s.name);
+  return `<div class="pin h-${s.handling}${s.id === selectedId ? ' sel' : ''}" style="background:${b.c}" title="${esc(s.name)}">${b.l}${isRecent(s) ? '<span class="dot">在庫</span>' : ''}</div>`;
+}
+function pinEl(s){ const w = document.createElement('div'); w.innerHTML = pinHTML(s); const el = w.firstElementChild;
+  el.addEventListener('click', e => { e.stopPropagation(); select(s.id); }); return el; }
+
+// ---------- Google Maps adapter ----------
+async function googleAdapter(el, view, key){
+  await new Promise((res, rej) => {
+    window.__gmReady = res;
+    window.gm_authFailure = () => { toast('Google Maps APIキーが無効か、必要なAPIが有効になっていません', 6000); };
+    const sc = document.createElement('script');
+    sc.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(key)}&v=weekly&language=ja&region=JP&loading=async&callback=__gmReady`;
+    sc.async = true; sc.onerror = () => rej(new Error('Google Maps を読み込めませんでした'));
+    document.head.appendChild(sc);
+  });
+  const {Map} = await google.maps.importLibrary('maps');
+  const {AdvancedMarkerElement} = await google.maps.importLibrary('marker');
+  const places = await google.maps.importLibrary('places');
+  const map = new Map(el, {center:{lat:view.lat, lng:view.lng}, zoom:view.zoom, mapId:'DEMO_MAP_ID',
+    clickableIcons:false, gestureHandling:'greedy', mapTypeControl:false, streetViewControl:false, fullscreenControl:false});
+  const markers = new globalThis.Map();
+  let me = null;
+  return {
+    name:'google',
+    getCenter(){ const c = map.getCenter(); return {lat:c.lat(), lng:c.lng()}; },
+    getView(){ const c = map.getCenter(); return {lat:c.lat(), lng:c.lng(), zoom:map.getZoom()}; },
+    setCenter(p, z){ map.panTo(p); if (z) map.setZoom(z); },
+    onIdle(cb){ map.addListener('idle', cb); },
+    onClick(cb){ map.addListener('click', e => cb(e.latLng.lat(), e.latLng.lng())); },
+    showMe(p){ if (!me){ const d = document.createElement('div'); d.className = 'me'; me = new AdvancedMarkerElement({map, position:p, content:d, zIndex:1}); } else me.position = p; },
+    sync(){
+      const ids = new Set();
+      for (const s of allStores()){
+        ids.add(s.id);
+        let m = markers.get(s.id);
+        if (!m){ m = new AdvancedMarkerElement({map, position:{lat:s.lat, lng:s.lng}, content:pinEl(s), title:s.name}); markers.set(s.id, m); }
+        else m.content = pinEl(s);
+        m.zIndex = s.id === selectedId ? 1000 : (s.handling === 'yes' ? 100 : s.handling === 'unknown' ? 50 : 10);
+      }
+      for (const [id, m] of markers) if (!ids.has(id)){ m.map = null; markers.delete(id); }
+    },
+    async search(){
+      const b = map.getBounds(), c = map.getCenter();
+      const radius = Math.min(Math.max(dist({lat:c.lat(), lng:c.lng()}, {lat:b.getNorthEast().lat(), lng:b.getNorthEast().lng()}), 300), 5000);
+      const {places: res} = await places.Place.searchNearby({
+        fields:['id', 'displayName', 'location', 'formattedAddress'],
+        locationRestriction:{center:c, radius},
+        includedPrimaryTypes:['convenience_store'],
+        maxResultCount:20,
+        rankPreference: places.SearchNearbyRankPreference.DISTANCE,
+        language:'ja', region:'jp',
+      });
+      return (res || []).map(p => ({id:'g:' + p.id, placeId:p.id, name:p.displayName, lat:p.location.lat(), lng:p.location.lng(),
+        address:(p.formattedAddress || '').replace(/^日本、?\s*(〒\d{3}-\d{4}\s*)?/, '')}));
+    },
+  };
+}
+
+// ---------- OpenStreetMap (Leaflet) adapter ----------
+async function osmAdapter(el, view){
+  await new Promise((res, rej) => {
+    const css = document.createElement('link'); css.rel = 'stylesheet'; css.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'; document.head.appendChild(css);
+    const sc = document.createElement('script'); sc.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'; sc.onload = res; sc.onerror = () => rej(new Error('地図ライブラリを読み込めませんでした'));
+    document.head.appendChild(sc);
+  });
+  const map = L.map(el, {zoomControl:true}).setView([view.lat, view.lng], view.zoom);
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom:19, attribution:'&copy; OpenStreetMap contributors'}).addTo(map);
+  const markers = new Map(); let me = null;
+  const icon = s => L.divIcon({html:pinHTML(s), className:'', iconSize:[30, 36], iconAnchor:[15, 36]});
+  return {
+    name:'osm',
+    getCenter(){ const c = map.getCenter(); return {lat:c.lat, lng:c.lng}; },
+    getView(){ const c = map.getCenter(); return {lat:c.lat, lng:c.lng, zoom:map.getZoom()}; },
+    setCenter(p, z){ map.setView([p.lat, p.lng], z || map.getZoom()); },
+    onIdle(cb){ map.on('moveend', cb); },
+    onClick(cb){ map.on('click', e => cb(e.latlng.lat, e.latlng.lng)); },
+    showMe(p){ if (!me) me = L.circleMarker([p.lat, p.lng], {radius:8, color:'#fff', weight:3, fillColor:'#2563eb', fillOpacity:1}).addTo(map); else me.setLatLng([p.lat, p.lng]); },
+    sync(){
+      const ids = new Set();
+      for (const s of allStores()){
+        ids.add(s.id);
+        let m = markers.get(s.id);
+        if (!m){ m = L.marker([s.lat, s.lng], {icon:icon(s), title:s.name}).addTo(map); m.on('click', () => select(s.id)); markers.set(s.id, m); }
+        else m.setIcon(icon(s));
+        m.setZIndexOffset(s.id === selectedId ? 1000 : (s.handling === 'yes' ? 100 : 0));
+      }
+      for (const [id, m] of markers) if (!ids.has(id)){ m.remove(); markers.delete(id); }
+    },
+    async search(){
+      if (map.getZoom() < 14) throw new Error('もう少し地図を拡大してから検索してください');
+      const b = map.getBounds(), bb = `${b.getSouth()},${b.getWest()},${b.getNorth()},${b.getEast()}`;
+      const q = `[out:json][timeout:25];(node["shop"="convenience"](${bb});way["shop"="convenience"](${bb}););out center 200;`;
+      const r = await fetch('https://overpass-api.de/api/interpreter', {method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body:'data=' + encodeURIComponent(q)});
+      if (!r.ok) throw new Error('店舗データの取得に失敗しました（少し待って再試行してください）');
+      const j = await r.json();
+      return j.elements.map(e => {
+        const t = e.tags || {}, lat = e.lat ?? e.center?.lat, lng = e.lon ?? e.center?.lon;
+        const name = [t['name:ja'] || t.name || t.brand || 'コンビニ', t.branch && !String(t.name || '').includes(t.branch) ? t.branch + '店' : ''].filter(Boolean).join(' ');
+        const address = [t['addr:province'], t['addr:city'], t['addr:quarter'], t['addr:neighbourhood'], t['addr:block_number'] || t['addr:housenumber']].filter(Boolean).join('');
+        return {id:`o:${e.type}/${e.id}`, name, lat, lng, address};
+      }).filter(p => p.lat != null);
+    },
+  };
+}
+
+// ---------- list ----------
+function renderList(){
+  const el = $('#list'); if (!el) return;
+  const c = mapA ? mapA.getCenter() : DEFAULT_VIEW;
+  const q = $('#q').value.trim().toLowerCase();
+  let arr = allStores().map(s => ({s, d:dist(c, s)}));
+  arr = arr.filter(({s}) => {
+    if (filter === 'yes' && s.handling !== 'yes') return false;
+    if (filter === 'no' && s.handling !== 'no') return false;
+    if (filter === 'unknown' && s.handling !== 'unknown') return false;
+    if (filter === 'recent' && !isRecent(s)) return false;
+    if (q){ const hay = (s.name + ' ' + s.address + ' ' + s.memo + ' ' + (s.logs || []).map(l => l.memo).join(' ')).toLowerCase(); if (!hay.includes(q)) return false; }
+    return true;
+  }).sort((a, b) => a.d - b.d).slice(0, 150);
+  if (!arr.length){
+    el.innerHTML = `<div class="empty">${allStores().length
+      ? '条件に合う店舗がありません。'
+      : '地図を見たい場所に動かして、上の <b>🔍 周辺のコンビニを探す</b> を押してください。<br>見つからない店舗は <b>＋</b> で手動追加できます。'}</div>`;
+    return;
+  }
+  el.innerHTML = arr.map(({s, d}) => {
+    const b = brandOf(s.name), last = sortedLogs(s)[0], ls = lastStock(s);
+    const meta = last ? `最終確認 ${fmtWhen(last.at)} <span class="res ${last.result}">${RESULTS[last.result]}</span>` : (s.memo ? esc(s.memo.slice(0, 40)) : esc(s.address));
+    return `<div class="item" data-id="${esc(s.id)}">
+      <div class="bd" style="background:${b.c}">${b.l}</div>
+      <div style="min-width:0"><div class="nm">${esc(s.name)}</div><div class="meta">${meta}</div>
+        ${ls ? `<div class="meta">在庫を見たのは ${ago(ls.at)}（${SLOT[ls.slot]?.l || ''}）</div>` : ''}</div>
+      <div class="right"><span class="tag ${s.handling}">${HANDLING[s.handling]}</span><div style="margin-top:4px">${fmtDist(d)}</div></div>
+    </div>`;
+  }).join('');
+}
+
+// ---------- detail ----------
+function select(id){
+  selectedId = id; mapA && mapA.sync();
+  const s = getStore(id); if (!s) return back();
+  if (mapA) mapA.setCenter({lat:s.lat, lng:s.lng});
+  renderDetail();
+  $('#listView').hidden = true; $('#detailView').hidden = false; $('#panel').classList.add('tall');
+}
+function back(){
+  selectedId = null; mapA && mapA.sync();
+  $('#detailView').hidden = true; $('#listView').hidden = false; $('#panel').classList.remove('tall');
+  renderList();
+}
+let draftResult = 'stock';
+function renderDetail(){
+  const s = getStore(selectedId); if (!s) return back();
+  const b = brandOf(s.name), logs = sortedLogs(s);
+  const gUrl = s.placeId
+    ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(s.name)}&query_place_id=${encodeURIComponent(s.placeId)}`
+    : `https://www.google.com/maps/search/?api=1&query=${s.lat},${s.lng}`;
+  const cnt = Object.fromEntries(SLOTS.map(x => [x.k, {stock:0, soldout:0}]));
+  for (const l of logs) if (cnt[l.slot] && (l.result === 'stock' || l.result === 'soldout')) cnt[l.slot][l.result]++;
+  const max = Math.max(1, ...SLOTS.map(x => cnt[x.k].stock + cnt[x.k].soldout));
+  const best = Math.max(...SLOTS.map(x => cnt[x.k].stock));
+  const now = new Date();
+  $('#detailView').innerHTML = `
+    <div class="dhead">
+      <button class="back" id="dBack">← 一覧に戻る</button>
+      <div class="dname"><span class="bd" style="background:${b.c};width:26px;height:26px;border-radius:50%;display:inline-grid;place-items:center;color:#fff;font-size:12px;flex:none">${b.l}</span>${esc(s.name)}</div>
+      <div class="daddr">${esc(s.address || '')}</div>
+      <div class="dlinks"><a href="${gUrl}" target="_blank" rel="noopener">Googleマップで開く ↗</a><button id="dRename">店名を編集</button></div>
+    </div>
+    <div class="scroll">
+      <div class="sec"><h3>ポケモンカードの扱い</h3>
+        <div class="seg" id="segH">${['yes', 'no', 'unknown'].map(k => `<button data-k="${k}" class="${k}${s.handling === k ? ' on' : ''}">${HANDLING[k]}</button>`).join('')}</div>
+      </div>
+      <div class="sec"><h3>販売を確認した記録を追加</h3>
+        <div class="seg" id="segR" style="margin-bottom:8px">${Object.entries(RESULTS).map(([k, v]) => `<button data-k="${k}" class="${k}${draftResult === k ? ' on' : ''}">${v}</button>`).join('')}</div>
+        <div class="row">
+          <input type="datetime-local" class="txt" id="fAt" value="${localISO(now)}">
+          <select class="txt" id="fSlot" style="flex:.7">${SLOTS.map(x => `<option value="${x.k}"${x.k === slotOfHour(now.getHours()) ? ' selected' : ''}>${x.l}（${x.r}）</option>`).join('')}</select>
+        </div>
+        <textarea class="txt" id="fMemo" placeholder="例：レジ横に151が3パック、1人1パック制限、10時ごろ品出し"></textarea>
+        <div style="height:8px"></div>
+        <button class="btn" id="fAdd">記録する</button>
+      </div>
+      <div class="sec"><h3>時間帯別に見た回数</h3>
+        <div class="slots">${SLOTS.map(x => { const c = cnt[x.k], tot = c.stock + c.soldout;
+          return `<div class="slot${best > 0 && c.stock === best ? ' best' : ''}" title="在庫あり ${c.stock}回 / 売り切れ ${c.soldout}回">
+            <div class="bar"><i class="so" style="height:${tot / max * 100}%"></i><i style="height:${c.stock / max * 100}%"></i></div>
+            <b>${c.stock}</b>${x.l}</div>`; }).join('')}</div>
+        <div class="hint">緑＝在庫ありを見た回数、薄い赤＝売り切れだった回数。${best > 0 ? `<b>${SLOTS.filter(x => cnt[x.k].stock === best).map(x => x.l).join('・')}</b>に在庫を見たことが一番多いです。` : '記録が増えると狙い目の時間帯がわかります。'}</div>
+      </div>
+      <div class="sec"><h3>店舗メモ</h3>
+        <textarea class="txt" id="sMemo" placeholder="例：入荷は火・金。店員さんに聞けば教えてくれる。駐車場あり">${esc(s.memo)}</textarea>
+        <div class="hint" id="sMemoHint">入力すると自動で保存されます</div>
+      </div>
+      <div class="sec"><h3>確認履歴（${logs.length}件）</h3>
+        ${logs.length ? logs.map(l => `<div class="log">
+            <div class="when">${fmtWhen(l.at)}<br><small>${SLOT[l.slot]?.l || ''}</small></div>
+            <div style="min-width:0"><span class="res ${l.result}">${RESULTS[l.result]}</span>${l.memo ? `<div class="memo">${esc(l.memo)}</div>` : ''}</div>
+            <button class="del" data-log="${esc(l.id)}" title="この記録を削除">×</button></div>`).join('')
+          : '<div class="hint" style="margin:0">まだ記録がありません</div>'}
+      </div>
+      <div class="sec" style="border-bottom:0"><button class="btn danger" id="dDelete">この店舗の記録をすべて削除</button></div>
+    </div>`;
+
+  $('#dBack').onclick = back;
+  $('#segH').onclick = e => { const k = e.target.dataset.k; if (!k) return; s.handling = k; commit(s); renderDetail(); };
+  $('#segR').onclick = e => { const k = e.target.dataset.k; if (!k) return; draftResult = k;
+    [...$('#segR').children].forEach(b => b.classList.toggle('on', b.dataset.k === k)); };
+  $('#fAt').onchange = e => { const d = new Date(e.target.value); if (!isNaN(d)) $('#fSlot').value = slotOfHour(d.getHours()); };
+  $('#fAdd').onclick = () => {
+    const at = $('#fAt').value || localISO(new Date());
+    s.logs = s.logs || [];
+    s.logs.push({id:uid(), at, slot:$('#fSlot').value, result:draftResult, memo:$('#fMemo').value.trim()});
+    if (s.handling === 'unknown' && (draftResult === 'stock' || draftResult === 'soldout')) s.handling = 'yes';
+    commit(s); renderDetail(); toast('記録しました');
+  };
+  let memoT;
+  $('#sMemo').oninput = e => { clearTimeout(memoT); memoT = setTimeout(() => { s.memo = e.target.value; commit(s); $('#sMemoHint').textContent = '保存しました'; }, 400); };
+  $('#detailView').querySelectorAll('.del').forEach(btn => btn.onclick = () => {
+    confirmBox('この記録を削除しますか？', () => { s.logs = s.logs.filter(l => l.id !== btn.dataset.log); commit(s); renderDetail(); });
+  });
+  $('#dRename').onclick = () => nameBox('店名を編集', s.name, v => { s.name = v; commit(s); renderDetail(); });
+  $('#dDelete').onclick = () => confirmBox(`「${s.name}」の扱い・メモ・履歴をすべて削除しますか？${s.custom ? '（手動追加した店舗なので地図からも消えます）' : ''}`, () => {
+    delete db.stores[s.id];
+    if (s.custom) delete found[s.id];
+    else found[s.id] = newStore(s);
+    store(DATA_KEY, db); back(); mapA.sync(); toast('削除しました');
+  });
+}
+
+// ---------- modals ----------
+function openModal(html){ $('#mbox').innerHTML = html; $('#modal').hidden = false; }
+function closeModal(){ $('#modal').hidden = true; }
+$('#modal').addEventListener('click', e => { if (e.target.id === 'modal' && cfg.engine) closeModal(); });
+function confirmBox(msg, ok){
+  openModal(`<p style="font-size:15px">${esc(msg)}</p><div class="btns"><button class="btn ghost" id="mNo">キャンセル</button><button class="btn" id="mYes">OK</button></div>`);
+  $('#mNo').onclick = closeModal; $('#mYes').onclick = () => { closeModal(); ok(); };
+}
+function nameBox(title, val, ok){
+  openModal(`<h2>${esc(title)}</h2><input class="txt" id="mName" value="${esc(val)}" placeholder="例：セブン-イレブン 〇〇駅前店">
+    <div class="btns"><button class="btn ghost" id="mNo">キャンセル</button><button class="btn" id="mYes">OK</button></div>`);
+  const i = $('#mName'); i.focus(); i.select();
+  const go = () => { const v = i.value.trim(); if (!v) return i.focus(); closeModal(); ok(v); };
+  $('#mNo').onclick = closeModal; $('#mYes').onclick = go; i.onkeydown = e => { if (e.key === 'Enter') go(); };
+}
+function settings(first){
+  const n = Object.keys(db.stores).length;
+  openModal(`
+    <h2>${first ? 'はじめに：地図の設定' : '設定'}</h2>
+    <label>使う地図</label>
+    <div class="radio">
+      <label><input type="radio" name="eng" value="google" ${cfg.engine !== 'osm' ? 'checked' : ''}><span>Googleマップ<small>APIキーが必要。店舗検索の精度が高い</small></span></label>
+      <label><input type="radio" name="eng" value="osm" ${cfg.engine === 'osm' ? 'checked' : ''}><span>OpenStreetMap<small>キー不要ですぐ使える。店舗情報はやや少なめ</small></span></label>
+    </div>
+    <label for="mKey">Google Maps APIキー</label>
+    <input class="txt" id="mKey" value="${esc(cfg.key)}" placeholder="AIza...">
+    <p>キーの取り方：</p>
+    <ol>
+      <li><a href="https://console.cloud.google.com/" target="_blank" rel="noopener">Google Cloud Console</a> でプロジェクトを作成（請求先アカウントの登録が必要）</li>
+      <li>「APIとサービス」→ <b>Maps JavaScript API</b> と <b>Places API (New)</b> を有効にする</li>
+      <li>「認証情報」→「APIキーを作成」。キーの制限で上の2つのAPIだけに絞っておくと安心です</li>
+    </ol>
+    <p>キーはこのブラウザの中にだけ保存されます。</p>
+    <div class="btns"><button class="btn" id="mSave">保存して地図を開く</button></div>
+    ${first ? '' : `<hr>
+    <h2 style="font-size:15px">データのバックアップ</h2>
+    <p>記録（${n}店舗）はこのブラウザの中に保存されています。別の端末に移すときやブラウザのデータを消す前に書き出してください。</p>
+    <div class="btns"><button class="btn ghost" id="mExport">書き出す (JSON)</button><button class="btn ghost" id="mImport">読み込む</button></div>
+    <div class="btns"><button class="btn ghost" id="mClose">閉じる</button></div>`}
+  `);
+  $('#mSave').onclick = () => {
+    const eng = document.querySelector('input[name=eng]:checked').value, key = $('#mKey').value.trim();
+    if (eng === 'google' && !key){ toast('Googleマップを使うにはAPIキーを入力してください'); return; }
+    const changed = eng !== cfg.engine || key !== cfg.key;
+    cfg.engine = eng; cfg.key = key; if (mapA) cfg.view = mapA.getView(); store(CFG_KEY, cfg);
+    if (changed) location.reload(); else closeModal();
+  };
+  if (!first){
+    $('#mClose').onclick = closeModal;
+    $('#mExport').onclick = exportData;
+    $('#mImport').onclick = () => $('#importFile').click();
+  }
+}
+function exportData(){
+  const blob = new Blob([JSON.stringify(db, null, 2)], {type:'application/json'});
+  const a = document.createElement('a'); const d = new Date();
+  a.href = URL.createObjectURL(blob); a.download = `pokeca-conbini-${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}.json`;
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+$('#importFile').onchange = async e => {
+  const f = e.target.files[0]; e.target.value = ''; if (!f) return;
+  try {
+    const j = JSON.parse(await f.text()); if (!j.stores) throw 0;
+    let n = 0;
+    for (const [id, inc] of Object.entries(j.stores)){
+      const cur = db.stores[id];
+      if (!cur){ db.stores[id] = inc; n++; continue; }
+      const logIds = new Set(cur.logs.map(l => l.id));
+      for (const l of inc.logs || []) if (!logIds.has(l.id)) cur.logs.push(l);
+      if ((inc.updatedAt || 0) > (cur.updatedAt || 0)){ cur.handling = inc.handling; cur.memo = inc.memo; cur.name = inc.name; }
+      n++;
+    }
+    store(DATA_KEY, db); mapA.sync(); renderList(); closeModal(); toast(`${n}店舗のデータを読み込みました`);
+  } catch { toast('読み込めないファイルです'); }
+};
+
+// ---------- header actions ----------
+$('#btnSearch').onclick = async () => {
+  if (!mapA) return;
+  const btn = $('#btnSearch'); btn.disabled = true; btn.style.opacity = .6;
+  try {
+    const res = await mapA.search();
+    const added = mergeFound(res);
+    mapA.sync(); renderList();
+    toast(res.length ? `${res.length}件のコンビニが見つかりました${added ? `（新規 ${added}件）` : ''}` : 'この範囲ではコンビニが見つかりませんでした');
+  } catch (err) {
+    console.error(err);
+    toast(err?.message?.includes('Places') || mapA.name === 'google'
+      ? '検索に失敗しました。Places API (New) が有効か確認してください'
+      : (err.message || '検索に失敗しました'), 5000);
+  } finally { btn.disabled = false; btn.style.opacity = 1; }
+};
+$('#btnLocate').onclick = () => {
+  if (!navigator.geolocation) return toast('この環境では現在地を取得できません');
+  navigator.geolocation.getCurrentPosition(
+    p => { const c = {lat:p.coords.latitude, lng:p.coords.longitude}; mapA.setCenter(c, 16); mapA.showMe(c); },
+    () => toast('現在地を取得できませんでした（位置情報の許可を確認してください）'),
+    {enableHighAccuracy:true, timeout:10000});
+};
+$('#btnAdd').onclick = () => { addMode = !addMode; $('#btnAdd').classList.toggle('on', addMode); $('#addBanner').hidden = !addMode; };
+$('#btnSettings').onclick = () => settings(false);
+$('#filters').onclick = e => { const f = e.target.dataset.f; if (!f) return; filter = f;
+  [...$('#filters').children].forEach(c => c.classList.toggle('on', c.dataset.f === f)); renderList(); };
+$('#q').oninput = renderList;
+$('#list').onclick = e => { const it = e.target.closest('.item'); if (it) select(it.dataset.id); };
+
+// ---------- boot ----------
+async function boot(){
+  if (!cfg.engine){ settings(true); return; }
+  const view = cfg.view || DEFAULT_VIEW;
+  try {
+    mapA = cfg.engine === 'google' ? await googleAdapter($('#map'), view, cfg.key) : await osmAdapter($('#map'), view);
+  } catch (err) {
+    console.error(err); toast(err.message || '地図を読み込めませんでした', 6000);
+    settings(false); return;
+  }
+  let saveT;
+  mapA.onIdle(() => { clearTimeout(saveT); saveT = setTimeout(() => { cfg.view = mapA.getView(); store(CFG_KEY, cfg); if (!selectedId) renderList(); }, 300); });
+  mapA.onClick((lat, lng) => {
+    if (!addMode) return;
+    addMode = false; $('#btnAdd').classList.remove('on'); $('#addBanner').hidden = true;
+    nameBox('店舗を追加', '', name => {
+      const s = newStore({id:'m:' + uid(), name, lat, lng, custom:true});
+      db.stores[s.id] = s; commit(s); select(s.id); toast('店舗を追加しました');
+    });
+  });
+  mapA.sync(); renderList();
+}
+boot();
+if ('serviceWorker' in navigator && location.protocol === 'https:') {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+})();
+</script>
+</body>
+</html>
