@@ -3,161 +3,173 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>ポケカ取扱いコンビニマップ</title>
+<title>ポケカ取扱いコンビニ帳</title>
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#1d2433">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="ポケカMAP">
+<meta name="apple-mobile-web-app-title" content="ポケカ帳">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <style>
 :root{
-  --bg:#f6f5f1; --card:#fff; --ink:#1d2433; --sub:#667085; --line:#e4e2db;
-  --accent:#e63946; --accent-ink:#fff; --yes:#16a34a; --no:#9ca3af; --unk:#f59e0b;
+  --bg:#f4f3ef; --card:#fff; --ink:#1d2433; --sub:#667085; --line:#e4e2db;
+  --accent:#e63946; --yes:#16a34a; --no:#9ca3af; --unk:#f59e0b;
   --stock:#16a34a; --soldout:#e63946; --none:#6b7280;
-  --r:12px;
 }
-*{box-sizing:border-box}
-html,body{margin:0;height:100%;font-family:system-ui,-apple-system,"Hiragino Sans","Noto Sans JP",sans-serif;color:var(--ink);background:var(--bg)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;font-family:system-ui,-apple-system,"Hiragino Sans","Noto Sans JP",sans-serif;color:var(--ink);background:var(--bg)}
 button,input,select,textarea{font:inherit;color:inherit}
 button{cursor:pointer}
-body{display:flex;flex-direction:column}
-header{display:flex;align-items:center;gap:8px;padding:calc(8px + env(safe-area-inset-top)) calc(12px + env(safe-area-inset-right)) 8px calc(12px + env(safe-area-inset-left));background:#1d2433;color:#fff;flex:none;z-index:5}
-header h1{font-size:16px;margin:0;font-weight:800;letter-spacing:.02em;white-space:nowrap}
-header h1 span{color:#ffcf3f;margin-left:2px}
-header .actions{margin-left:auto;display:flex;gap:6px}
-.hbtn{border:0;border-radius:10px;padding:8px 11px;background:#2f3a52;color:#fff;font-weight:700;font-size:14px;line-height:1}
-.hbtn.primary{background:var(--accent)}
-.hbtn.on{background:#ffcf3f;color:#1d2433}
-main{flex:1;display:flex;min-height:0;position:relative}
-#map{flex:1;min-width:0;background:#dde3ea}
-#panel{width:390px;flex:none;background:var(--card);border-left:1px solid var(--line);display:flex;flex-direction:column;min-height:0;padding-bottom:env(safe-area-inset-bottom)}
-body{overscroll-behavior:none}
-@media (max-width:760px){
-  main{flex-direction:column}
-  #panel{width:auto;height:46vh;border-left:0;border-top:1px solid var(--line)}
-  #panel.tall{height:72vh}
-  .hide-sm{display:none}
-}
-.view{display:flex;flex-direction:column;min-height:0;flex:1}
-.view[hidden]{display:none}
-.ptop{padding:10px 12px;border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:8px;flex:none}
-.chips{display:flex;gap:6px;flex-wrap:wrap}
-.chip{border:1px solid var(--line);background:#fff;border-radius:999px;padding:5px 11px;font-size:13px;font-weight:600}
+input,select,textarea{font-size:16px} /* iPhoneの自動ズーム防止 */
+.wrap{max-width:720px;margin:0 auto;width:100%;min-width:0}
+header{position:sticky;top:0;z-index:10;background:#1d2433;color:#fff;padding:calc(10px + env(safe-area-inset-top)) 14px 10px}
+header .top{display:flex;align-items:center;gap:8px}
+header h1{font-size:17px;margin:0;font-weight:800}
+header h1 span{color:#ffcf3f}
+.hbtn{border:0;border-radius:10px;padding:8px 11px;background:#2f3a52;color:#fff;font-weight:700;font-size:14px}
+.ml{margin-left:auto}
+.filters{background:var(--card);border-bottom:1px solid var(--line);padding:10px 14px;position:sticky;top:calc(52px + env(safe-area-inset-top));z-index:9;display:flex;flex-direction:column;gap:8px}
+.chips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:0 -14px;padding:0 14px}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;border:1px solid var(--line);background:#fff;border-radius:999px;padding:6px 12px;font-size:13px;font-weight:700;white-space:nowrap}
 .chip.on{background:var(--ink);color:#fff;border-color:var(--ink)}
-.txt{width:100%;border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:#fff}
-.scroll{overflow:auto;flex:1;min-height:0}
-.item{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-bottom:1px solid var(--line);cursor:pointer}
-.item:hover{background:#faf9f6}
-.item .bd{width:28px;height:28px;border-radius:50%;flex:none;display:grid;place-items:center;color:#fff;font-weight:800;font-size:13px}
-.item .nm{font-weight:700;font-size:14px}
-.item .meta{font-size:12px;color:var(--sub);margin-top:2px}
-.item .right{margin-left:auto;text-align:right;flex:none;font-size:12px;color:var(--sub)}
-.tag{display:inline-block;font-size:11px;font-weight:700;border-radius:6px;padding:2px 6px;color:#fff}
+.chip .sw{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;vertical-align:0}
+.chip.ch{opacity:.45}
+.chip.ch.on{opacity:1;background:#fff;color:var(--ink);border-color:var(--ink)}
+.row{display:flex;gap:8px}
+.row>*{flex:1;min-width:0}
+.txt{width:100%;border:1px solid var(--line);border-radius:10px;padding:9px 10px;background:#fff}
+.count{font-size:12px;color:var(--sub);padding:8px 14px 4px;display:flex;justify-content:space-between;gap:8px}
+.list{background:var(--card)}
+.item{display:flex;gap:10px;align-items:center;padding:12px 14px;border-bottom:1px solid var(--line);cursor:pointer}
+.item:active{background:#f6f5f1}
+.badge{width:34px;height:34px;border-radius:9px;flex:none;display:grid;place-items:center;color:#fff;font-weight:900;font-size:13px}
+.item .nm{font-weight:700;font-size:15px;line-height:1.3}
+.item .meta{font-size:12px;color:var(--sub);margin-top:2px;line-height:1.4}
+.item .right{margin-left:auto;text-align:right;flex:none;font-size:12px;color:var(--sub);display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+.tag{display:inline-block;font-size:11px;font-weight:800;border-radius:6px;padding:3px 7px;color:#fff;white-space:nowrap}
 .tag.yes{background:var(--yes)} .tag.no{background:var(--no)} .tag.unknown{background:#fff;color:var(--unk);border:1px solid var(--unk)}
-.res{font-weight:700}
+.tag.hot{background:var(--accent)}
+.res{font-weight:800}
 .res.stock{color:var(--stock)} .res.soldout{color:var(--soldout)} .res.none{color:var(--none)}
-.empty{padding:24px 16px;color:var(--sub);font-size:14px;line-height:1.7}
-.dhead{padding:12px;border-bottom:1px solid var(--line);flex:none}
-.back{border:0;background:none;color:var(--sub);padding:0;font-size:13px;font-weight:600}
-.dname{font-size:18px;font-weight:800;margin:6px 0 2px;display:flex;gap:8px;align-items:center}
-.daddr{font-size:12px;color:var(--sub)}
-.dlinks{margin-top:6px;font-size:13px;display:flex;gap:12px;flex-wrap:wrap}
-.dlinks a{color:#2563eb;font-weight:600;text-decoration:none}
-.dlinks button{border:0;background:none;padding:0;color:var(--sub);font-size:13px;text-decoration:underline}
-.sec{padding:12px;border-bottom:1px solid var(--line)}
-.sec h3{font-size:13px;margin:0 0 8px;color:var(--sub);font-weight:700}
-.seg{display:flex;border:1px solid var(--line);border-radius:10px;overflow:hidden}
-.seg button{flex:1;border:0;background:#fff;padding:9px 4px;font-weight:700;font-size:14px;border-right:1px solid var(--line)}
+.empty{padding:28px 18px;color:var(--sub);font-size:14px;line-height:1.8;text-align:center}
+.more{display:block;width:100%;border:0;background:#fff;padding:14px;color:#2563eb;font-weight:700;border-bottom:1px solid var(--line)}
+.foot{padding:16px 14px calc(24px + env(safe-area-inset-bottom));font-size:12px;color:var(--sub);line-height:1.7}
+.foot button{border:1px solid var(--line);background:#fff;border-radius:10px;padding:9px 12px;font-weight:700;font-size:13px;color:var(--ink)}
+
+/* detail */
+#detail{position:fixed;inset:0;z-index:30;background:var(--bg);overflow:auto;transform:translateX(100%);transition:transform .22s ease;-webkit-overflow-scrolling:touch}
+#detail.open{transform:none}
+.dhead{position:sticky;top:0;z-index:2;background:#1d2433;color:#fff;padding:calc(10px + env(safe-area-inset-top)) 14px 10px;display:flex;align-items:center;gap:8px}
+.dhead .back{border:0;background:none;color:#fff;font-weight:700;font-size:15px;padding:4px 0}
+.dinfo{background:var(--card);padding:14px;border-bottom:1px solid var(--line)}
+.dname{font-size:19px;font-weight:800;display:flex;gap:10px;align-items:center;line-height:1.3}
+.dsub{font-size:13px;color:var(--sub);margin-top:6px;line-height:1.6}
+.dlinks{margin-top:8px;display:flex;gap:14px;flex-wrap:wrap;font-size:14px}
+.dlinks a{color:#2563eb;font-weight:700;text-decoration:none}
+.dlinks button{border:0;background:none;padding:0;color:var(--sub);font-size:14px;text-decoration:underline}
+.sec{background:var(--card);padding:14px;margin-top:10px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.sec h3{font-size:13px;margin:0 0 10px;color:var(--sub);font-weight:800}
+.seg{display:flex;border:1px solid var(--line);border-radius:11px;overflow:hidden}
+.seg button{flex:1;border:0;background:#fff;padding:11px 4px;font-weight:800;font-size:15px;border-right:1px solid var(--line)}
 .seg button:last-child{border-right:0}
-.seg button.on.yes{background:var(--yes);color:#fff}
+.seg button.on.yes,.seg button.on.stock{background:var(--yes);color:#fff}
 .seg button.on.no{background:var(--no);color:#fff}
 .seg button.on.unknown{background:var(--unk);color:#fff}
-.seg button.on.stock{background:var(--stock);color:#fff}
 .seg button.on.soldout{background:var(--soldout);color:#fff}
 .seg button.on.none{background:var(--none);color:#fff}
-.row{display:flex;gap:8px;margin-bottom:8px}
-.row>*{flex:1;min-width:0}
-textarea.txt{resize:vertical;min-height:58px}
-.btn{border:0;border-radius:10px;padding:10px 14px;font-weight:800;background:var(--ink);color:#fff;width:100%}
+.slotpick{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.slotpick button{border:1px solid var(--line);background:#fff;border-radius:10px;padding:8px 2px;font-weight:800;font-size:14px;line-height:1.2}
+.slotpick button small{display:block;font-weight:500;font-size:10px;color:var(--sub)}
+.slotpick button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.slotpick button.on small{color:#cbd5e1}
+textarea.txt{resize:vertical;min-height:64px}
+.btn{border:0;border-radius:11px;padding:12px 14px;font-weight:800;background:var(--ink);color:#fff;width:100%;font-size:15px}
 .btn.ghost{background:#fff;color:var(--ink);border:1px solid var(--line)}
 .btn.danger{background:#fff;color:var(--accent);border:1px solid #f3c1c5}
+.lbl{font-size:12px;color:var(--sub);font-weight:700;margin:12px 0 6px}
 .slots{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;align-items:end}
 .slot{text-align:center;font-size:11px;color:var(--sub)}
-.slot .bar{height:48px;border-radius:6px;background:#f1f0ec;position:relative;overflow:hidden;margin-bottom:3px}
+.slot .bar{height:54px;border-radius:6px;background:#f1f0ec;position:relative;overflow:hidden;margin-bottom:3px}
 .slot .bar i{position:absolute;left:0;right:0;bottom:0;background:var(--stock);border-radius:6px}
-.slot .bar i.so{background:var(--soldout);opacity:.35}
-.slot b{display:block;color:var(--ink);font-size:12px}
+.slot .bar i.so{background:var(--soldout);opacity:.3}
+.slot b{display:block;color:var(--ink);font-size:13px}
 .slot.best b{color:var(--stock)}
-.hint{font-size:12px;color:var(--sub);margin-top:6px;line-height:1.6}
-.log{display:flex;gap:8px;padding:8px 0;border-bottom:1px dashed var(--line);font-size:13px}
+.hint{font-size:12px;color:var(--sub);margin-top:8px;line-height:1.6}
+.log{display:flex;gap:10px;padding:10px 0;border-bottom:1px dashed var(--line);font-size:14px}
 .log:last-child{border-bottom:0}
-.log .when{color:var(--sub);flex:none;width:118px}
-.log .memo{color:var(--ink);margin-top:2px;white-space:pre-wrap;word-break:break-word}
-.log .del{margin-left:auto;border:0;background:none;color:var(--sub);font-size:16px;line-height:1;padding:0 2px;flex:none}
-/* pins */
-.pin{position:relative;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:900;font-size:13px;
-  border:3px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.35);transform-origin:50% 120%;transition:transform .12s;cursor:pointer;margin-bottom:6px}
-.pin::after{content:"";position:absolute;bottom:-9px;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top:6px solid var(--ring,#fff)}
-.pin.h-yes{border-color:var(--yes);--ring:var(--yes)}
-.pin.h-no{border-color:#d1d5db;--ring:#d1d5db;opacity:.55;filter:grayscale(.7)}
-.pin.h-unknown{border-color:#fff;--ring:#fff}
-.pin.sel{transform:scale(1.3);z-index:9}
-.pin .dot{position:absolute;top:-6px;right:-7px;background:var(--accent);color:#fff;font-size:10px;border-radius:999px;padding:1px 4px;border:2px solid #fff;line-height:1.1}
-.me{width:16px;height:16px;border-radius:50%;background:#2563eb;border:3px solid #fff;box-shadow:0 0 0 6px rgba(37,99,235,.2)}
-/* modal */
+.log .when{color:var(--sub);flex:none;width:112px;font-size:13px;line-height:1.5}
+.log .memo{margin-top:3px;white-space:pre-wrap;word-break:break-word}
+.log .del{margin-left:auto;border:0;background:none;color:var(--sub);font-size:18px;padding:0 4px;flex:none}
+
+/* overlays */
 #modal{position:fixed;inset:0;background:rgba(15,20,30,.5);display:grid;place-items:center;z-index:50;padding:16px}
 #modal[hidden]{display:none}
-.mbox{background:#fff;border-radius:16px;max-width:520px;width:100%;max-height:90vh;overflow:auto;padding:18px}
+.mbox{background:#fff;border-radius:16px;max-width:480px;width:100%;max-height:88vh;overflow:auto;padding:18px}
 .mbox h2{margin:0 0 10px;font-size:18px}
-.mbox p,.mbox li{font-size:13px;line-height:1.7;color:#344054}
-.mbox ol{padding-left:20px;margin:6px 0}
+.mbox p{font-size:14px;line-height:1.7;color:#344054;margin:6px 0}
 .mbox label{display:block;font-size:13px;font-weight:700;margin:12px 0 4px}
-.mbox .btns{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
-.mbox .btns .btn{flex:1;min-width:140px}
+.btns{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+.btns .btn{flex:1;min-width:130px}
 .mbox hr{border:0;border-top:1px solid var(--line);margin:16px 0}
-.radio{display:flex;gap:8px}
-.radio label{flex:1;margin:0;border:1px solid var(--line);border-radius:10px;padding:10px;font-weight:600;display:flex;gap:6px;align-items:flex-start;cursor:pointer}
-.radio label small{display:block;font-weight:400;color:var(--sub);font-size:11px}
-#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);background:#1d2433;color:#fff;padding:10px 16px;border-radius:10px;font-size:14px;opacity:0;pointer-events:none;transition:.2s;z-index:60;max-width:90vw}
-#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-#addBanner{position:absolute;top:10px;left:50%;transform:translateX(-50%);background:#ffcf3f;color:#1d2433;font-weight:700;font-size:13px;padding:8px 14px;border-radius:999px;box-shadow:0 2px 8px rgba(0,0,0,.2);z-index:4}
-#addBanner[hidden]{display:none}
-.leaflet-div-icon{background:none;border:0}
+#loading{position:fixed;inset:0;z-index:40;background:var(--bg);display:grid;place-items:center;padding:24px;text-align:center}
+#loading[hidden]{display:none}
+#loading .box{max-width:360px}
+#loading h2{font-size:18px;margin:0 0 8px}
+#loading p{font-size:14px;color:var(--sub);line-height:1.7}
+.spin{width:36px;height:36px;border:4px solid #ddd;border-top-color:var(--accent);border-radius:50%;margin:0 auto 14px;animation:sp 1s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+#toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(20px);background:#1d2433;color:#fff;padding:10px 16px;border-radius:10px;font-size:14px;opacity:0;pointer-events:none;transition:.2s;z-index:60;max-width:90vw}
+#toast.show{opacity:1;transform:translateX(-50%)}
 </style>
 </head>
 <body>
 <header>
-  <h1>ポケカ<span>コンビニマップ</span></h1>
-  <div class="actions">
-    <button class="hbtn primary" id="btnSearch">🔍 周辺のコンビニ<span class="hide-sm">を探す</span></button>
-    <button class="hbtn" id="btnLocate" title="現在地へ移動">◎</button>
-    <button class="hbtn" id="btnAdd" title="地図をタップして店舗を手動で追加">＋</button>
-    <button class="hbtn" id="btnSettings" title="設定・バックアップ">⚙</button>
+  <div class="wrap top">
+    <h1>ポケカ<span>取扱いコンビニ帳</span></h1>
+    <button class="hbtn ml" id="btnAdd" title="店舗を追加">＋</button>
+    <button class="hbtn" id="btnSettings" title="設定">⚙</button>
   </div>
 </header>
-<main>
-  <div id="map"></div>
-  <div id="addBanner" hidden>地図上の店舗の位置をタップしてください（もう一度＋で中止）</div>
-  <aside id="panel">
-    <section class="view" id="listView">
-      <div class="ptop">
-        <div class="chips" id="filters">
-          <button class="chip on" data-f="all">すべて</button>
-          <button class="chip" data-f="yes">扱いあり</button>
-          <button class="chip" data-f="recent">最近在庫あり</button>
-          <button class="chip" data-f="unknown">未確認</button>
-          <button class="chip" data-f="no">扱いなし</button>
-        </div>
-        <input class="txt" id="q" placeholder="店名・住所・メモで絞り込み">
-      </div>
-      <div class="scroll" id="list"></div>
-    </section>
-    <section class="view" id="detailView" hidden></section>
-  </aside>
-</main>
+<div class="filters">
+  <div class="wrap" style="display:flex;flex-direction:column;gap:8px">
+    <div class="row">
+      <select class="txt" id="fArea">
+        <option value="all">すべての地域</option>
+        <option value="相模原市">相模原市（全区）</option>
+        <option value="相模原市緑区">　相模原市 緑区</option>
+        <option value="相模原市中央区">　相模原市 中央区</option>
+        <option value="相模原市南区">　相模原市 南区</option>
+        <option value="町田市">町田市</option>
+      </select>
+      <select class="txt" id="fSort">
+        <option value="name">名前順</option>
+        <option value="recent">最近確認した順</option>
+        <option value="near">近い順（現在地）</option>
+      </select>
+    </div>
+    <div class="chips" id="fChain"></div>
+    <div class="chips" id="fStatus">
+      <button class="chip on" data-f="all">すべて</button>
+      <button class="chip" data-f="yes">扱いあり</button>
+      <button class="chip" data-f="hot">3日以内に在庫あり</button>
+      <button class="chip" data-f="unknown">未確認</button>
+      <button class="chip" data-f="no">扱いなし</button>
+      <button class="chip" data-f="closed">非表示にした店</button>
+    </div>
+    <input class="txt" id="fQ" type="search" placeholder="店名・住所・メモで検索">
+  </div>
+</div>
+<div class="wrap">
+  <div class="count" id="count"></div>
+  <div class="list" id="list"></div>
+  <div class="foot" id="foot"></div>
+</div>
+
+<div id="detail"></div>
+<div id="loading" hidden><div class="box" id="loadingBox"></div></div>
 <div id="modal" hidden><div class="mbox" id="mbox"></div></div>
 <div id="toast"></div>
 <input type="file" id="importFile" accept="application/json,.json" hidden>
@@ -165,458 +177,444 @@ textarea.txt{resize:vertical;min-height:58px}
 <script>
 (() => {
 'use strict';
-const DATA_KEY = 'pokeca-conbini-map:data:v1';
-const CFG_KEY  = 'pokeca-conbini-map:cfg:v1';
-const DEFAULT_VIEW = {lat:35.681236, lng:139.767125, zoom:16}; // 東京駅
-
+// ===== 定数 =====
+const DATA_KEY  = 'pokeca-list:data:v1';   // 記録（扱い・履歴・メモ・手動追加店舗）
+const CACHE_KEY = 'pokeca-list:stores:v1'; // OpenStreetMapから取った店舗リスト
+const UI_KEY    = 'pokeca-list:ui:v1';
+const OVERPASS = [
+  'https://overpass-api.de/api/interpreter',
+  'https://overpass.private.coffee/api/interpreter',
+  'https://maps.mail.ru/osm/tools/overpass/api/interpreter',
+];
+const QUERY = `[out:json][timeout:180];
+area["name"="相模原市"]["boundary"="administrative"]->.s;
+area["name"="町田市"]["boundary"="administrative"]->.m;
+.s out tags;
+nwr["shop"="convenience"](area.s);
+out center tags;
+.m out tags;
+nwr["shop"="convenience"](area.m);
+out center tags;
+rel(area.s)["boundary"="administrative"]["name"~"^(緑区|中央区|南区)$"];
+map_to_area->.wards;
+foreach.wards->.w(
+  .w out tags;
+  nwr["shop"="convenience"](area.w);
+  out ids;
+);`;
+const CHAINS = {
+  seven:    {l:'セブン-イレブン',  s:'セブン',     b:'7', c:'#f26f21', re:/セブン|7-?eleven|seven[\s-]?eleven/i},
+  lawson:   {l:'ローソン',        s:'ローソン',   b:'L', c:'#1a6fc4', re:/ローソン|lawson/i},
+  family:   {l:'ファミリーマート', s:'ファミマ',   b:'F', c:'#0a9b4a', re:/ファミリーマート|ファミマ|family\s?mart/i},
+  ministop: {l:'ミニストップ',    s:'ミニストップ', b:'M', c:'#d99a00', re:/ミニストップ|mini\s?stop/i},
+};
 const SLOTS = [
-  {k:'early',     l:'早朝', r:'5–8時',   f:5,  t:8},
-  {k:'morning',   l:'朝',   r:'8–11時',  f:8,  t:11},
-  {k:'noon',      l:'昼',   r:'11–14時', f:11, t:14},
-  {k:'afternoon', l:'午後', r:'14–17時', f:14, t:17},
-  {k:'evening',   l:'夕方', r:'17–20時', f:17, t:20},
-  {k:'night',     l:'夜',   r:'20–24時', f:20, t:24},
-  {k:'late',      l:'深夜', r:'0–5時',   f:0,  t:5},
+  {k:'early',l:'早朝',r:'5–8時',f:5,t:8}, {k:'morning',l:'朝',r:'8–11時',f:8,t:11},
+  {k:'noon',l:'昼',r:'11–14時',f:11,t:14}, {k:'afternoon',l:'午後',r:'14–17時',f:14,t:17},
+  {k:'evening',l:'夕方',r:'17–20時',f:17,t:20}, {k:'night',l:'夜',r:'20–24時',f:20,t:24},
+  {k:'late',l:'深夜',r:'0–5時',f:0,t:5},
 ];
 const SLOT = Object.fromEntries(SLOTS.map(s => [s.k, s]));
 const slotOfHour = h => (SLOTS.find(s => h >= s.f && h < s.t) || SLOTS[6]).k;
 const RESULTS = {stock:'在庫あり', soldout:'売り切れ', none:'置いてない'};
 const HANDLING = {yes:'扱いあり', no:'扱いなし', unknown:'未確認'};
-const BRANDS = [
-  [/セブン|7-?eleven|seven/i, '7', '#f26f21'],
-  [/ファミリーマート|ファミマ|family\s?mart/i, 'F', '#0a9b4a'],
-  [/ナチュラルローソン|ローソンストア100|ローソン|lawson/i, 'L', '#1a6fc4'],
-  [/ミニストップ|ministop/i, 'M', '#e3a400'],
-  [/デイリーヤマザキ|ヤマザキ|daily/i, 'D', '#d7261e'],
-  [/セイコーマート|seicomart/i, 'S', '#f08a00'],
-  [/newdays|ニューデイズ/i, 'N', '#127a3c'],
-  [/ポプラ|poplar/i, 'P', '#c2410c'],
-];
 const WD = '日月火水木金土';
+const PAGE = 80;
 
-// ---------- utils ----------
+// ===== 小道具 =====
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const load = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v ?? d; } catch { return d; } };
-const store = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch { toast('ブラウザに保存できませんでした'); return false; } };
+const load = (k, d) => { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } };
+const save = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch { toast('保存できませんでした（容量不足の可能性）'); return false; } };
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
 const pad = n => String(n).padStart(2, '0');
 const localISO = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
-function fmtWhen(iso){ const d = new Date(iso); if (isNaN(d)) return iso; return `${d.getMonth()+1}/${d.getDate()}(${WD[d.getDay()]}) ${pad(d.getHours())}:${pad(d.getMinutes())}`; }
-function ago(iso){
-  const ms = Date.now() - new Date(iso).getTime(); const h = ms / 36e5;
-  if (h < 1) return 'さっき'; if (h < 24) return `${Math.floor(h)}時間前`;
-  const d = Math.floor(h / 24); return d < 31 ? `${d}日前` : `${Math.floor(d/30)}か月前`;
-}
-function dist(a, b){
-  const R = 6371e3, t = Math.PI/180, dLa = (b.lat-a.lat)*t, dLo = (b.lng-a.lng)*t;
-  const x = Math.sin(dLa/2)**2 + Math.cos(a.lat*t)*Math.cos(b.lat*t)*Math.sin(dLo/2)**2;
-  return 2*R*Math.asin(Math.sqrt(x));
-}
+const fmtWhen = iso => { const d = new Date(iso); return isNaN(d) ? iso : `${d.getMonth()+1}/${d.getDate()}(${WD[d.getDay()]}) ${pad(d.getHours())}:${pad(d.getMinutes())}`; };
+const fmtDate = ms => { const d = new Date(ms); return `${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()}`; };
+function ago(iso){ const h = (Date.now() - new Date(iso)) / 36e5; if (h < 1) return 'さっき'; if (h < 24) return `${Math.floor(h)}時間前`; const d = Math.floor(h/24); return d < 31 ? `${d}日前` : `${Math.floor(d/30)}か月前`; }
+function dist(a, b){ const R = 6371e3, t = Math.PI/180, x = Math.sin((b.lat-a.lat)*t/2)**2 + Math.cos(a.lat*t)*Math.cos(b.lat*t)*Math.sin((b.lng-a.lng)*t/2)**2; return 2*R*Math.asin(Math.sqrt(x)); }
 const fmtDist = m => m < 1000 ? `${Math.round(m)}m` : `${(m/1000).toFixed(1)}km`;
-function brandOf(name){ for (const [re, l, c] of BRANDS) if (re.test(name || '')) return {l, c}; return {l:'C', c:'#6b7280'}; }
+const kana = s => String(s || '').normalize('NFKC').toLowerCase();
 let toastT;
-function toast(msg, ms = 2600){ const t = $('#toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), ms); }
+function toast(m, ms = 2600){ const t = $('#toast'); t.textContent = m; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), ms); }
 
-// ---------- data ----------
-let cfg = load(CFG_KEY, {engine:null, key:'', view:null});
-let db = load(DATA_KEY, {version:1, stores:{}});
-if (!db.stores) db.stores = {};
-const found = {};            // 今回の検索で見つかった（まだ記録のない）店舗
-let selectedId = null, filter = 'all', addMode = false, mapA = null;
+// ===== データ =====
+let db = load(DATA_KEY, {version:1, recs:{}, manual:{}});
+db.recs ||= {}; db.manual ||= {};
+let cache = load(CACHE_KEY, null);
+let ui = load(UI_KEY, {area:'all', sort:'name', chains:Object.keys(CHAINS), status:'all'});
+let here = null, shown = PAGE, currentId = null;
 
-const allStores = () => { const m = {...found}; Object.assign(m, db.stores); return Object.values(m); };
-const getStore = id => db.stores[id] || found[id];
-const sortedLogs = s => [...(s.logs || [])].sort((a, b) => b.at.localeCompare(a.at));
+const rec = id => db.recs[id] || {handling:'unknown', memo:'', logs:[]};
+function baseStores(){ return [...(cache?.stores || []), ...Object.values(db.manual)]; }
+function view(b){
+  const r = rec(b.id);
+  return {...b, name:r.customName || b.name, handling:r.handling || 'unknown', memo:r.memo || '', logs:r.logs || [], closed:!!r.closed};
+}
+const byId = id => { const b = baseStores().find(s => s.id === id); return b && view(b); };
+const sortedLogs = s => [...s.logs].sort((a, b) => b.at.localeCompare(a.at));
 const lastStock = s => sortedLogs(s).find(l => l.result === 'stock');
-const isRecent = s => { const l = lastStock(s); return l && (Date.now() - new Date(l.at)) < 3*864e5; };
-const hasData = s => s.handling !== 'unknown' || s.memo || (s.logs && s.logs.length) || s.custom;
-function newStore(p){
-  return {id:p.id, name:p.name || 'コンビニ', lat:p.lat, lng:p.lng, address:p.address || '', placeId:p.placeId || '',
-          handling:'unknown', memo:'', logs:[], custom:!!p.custom, createdAt:Date.now(), updatedAt:Date.now()};
+const isHot = s => { const l = lastStock(s); return !!l && Date.now() - new Date(l.at) < 3*864e5; };
+function updateRec(id, fn){
+  const r = db.recs[id] ? db.recs[id] : {handling:'unknown', memo:'', logs:[]};
+  fn(r); r.updatedAt = Date.now();
+  const empty = r.handling === 'unknown' && !r.memo && !(r.logs && r.logs.length) && !r.customName && !r.closed;
+  if (empty) delete db.recs[id]; else db.recs[id] = r;
+  save(DATA_KEY, db);
 }
-function commit(s){
-  s.updatedAt = Date.now();
-  if (hasData(s)) db.stores[s.id] = s; else { delete db.stores[s.id]; found[s.id] = s; }
-  store(DATA_KEY, db);
-  mapA && mapA.sync();
-  renderList();
+
+// ===== 店舗リスト取得（OpenStreetMap） =====
+function chainOf(t){
+  const hay = [t.brand, t['brand:ja'], t['brand:en'], t.name, t['name:ja'], t['name:en']].filter(Boolean).join(' ');
+  for (const [k, c] of Object.entries(CHAINS)) if (c.re.test(hay)) return k;
+  return null;
 }
-function mergeFound(list){
-  let added = 0;
-  for (const p of list){
-    const ex = db.stores[p.id];
-    if (ex){ if (!ex.address && p.address) ex.address = p.address; if (!ex.placeId && p.placeId) ex.placeId = p.placeId; continue; }
-    if (!found[p.id]){ found[p.id] = newStore(p); added++; }
+function storeName(t, ch){
+  let nm = (t['name:ja'] || t.name || CHAINS[ch].l).trim();
+  const br = (t['branch:ja'] || t.branch || '').trim();
+  if (br && !nm.includes(br)) nm += ' ' + (/(店|前)$/.test(br) ? br : br + '店');
+  return nm;
+}
+function addrOf(t){
+  if (t['addr:full']) return t['addr:full'];
+  return [t['addr:province'], t['addr:city'], t['addr:suburb'], t['addr:quarter'], t['addr:neighbourhood'], t['addr:block_number'], t['addr:housenumber']]
+    .filter(Boolean).join('').replace(/^神奈川県|^東京都/, '');
+}
+function parseOverpass(json){
+  const stores = new Map(), wardOf = {};
+  let mode = null, cur = null;
+  for (const e of json.elements || []){
+    if (e.type === 'area'){
+      const n = e.tags?.name || '';
+      if (n === '相模原市' || n === '町田市'){ mode = 'city'; cur = n; }
+      else { mode = 'ward'; cur = n; }
+      continue;
+    }
+    const id = `osm:${e.type}/${e.id}`;
+    if (mode === 'ward'){ if (cur) wardOf[id] = cur; continue; }
+    if (mode !== 'city') continue;
+    const t = e.tags || {}, ch = chainOf(t);
+    if (!ch) continue;
+    const lat = e.lat ?? e.center?.lat, lng = e.lon ?? e.center?.lon;
+    if (lat == null) continue;
+    stores.set(id, {id, chain:ch, name:storeName(t, ch), city:cur, ward:'', lat, lng, addr:addrOf(t)});
   }
-  return added;
+  for (const s of stores.values()){
+    if (s.city === '相模原市'){
+      let w = wardOf[s.id];
+      if (!w){ const m = (s.addr || '').match(/(緑区|中央区|南区)/); if (m) w = m[1]; }
+      s.ward = w || '';
+    }
+  }
+  return [...stores.values()];
 }
-
-// ---------- pin ----------
-function pinHTML(s){
-  const b = brandOf(s.name);
-  return `<div class="pin h-${s.handling}${s.id === selectedId ? ' sel' : ''}" style="background:${b.c}" title="${esc(s.name)}">${b.l}${isRecent(s) ? '<span class="dot">在庫</span>' : ''}</div>`;
-}
-function pinEl(s){ const w = document.createElement('div'); w.innerHTML = pinHTML(s); const el = w.firstElementChild;
-  el.addEventListener('click', e => { e.stopPropagation(); select(s.id); }); return el; }
-
-// ---------- Google Maps adapter ----------
-async function googleAdapter(el, view, key){
-  await new Promise((res, rej) => {
-    window.__gmReady = res;
-    window.gm_authFailure = () => { toast('Google Maps APIキーが無効か、必要なAPIが有効になっていません', 6000); };
-    const sc = document.createElement('script');
-    sc.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(key)}&v=weekly&language=ja&region=JP&loading=async&callback=__gmReady`;
-    sc.async = true; sc.onerror = () => rej(new Error('Google Maps を読み込めませんでした'));
-    document.head.appendChild(sc);
-  });
-  const {Map} = await google.maps.importLibrary('maps');
-  const {AdvancedMarkerElement} = await google.maps.importLibrary('marker');
-  const places = await google.maps.importLibrary('places');
-  const map = new Map(el, {center:{lat:view.lat, lng:view.lng}, zoom:view.zoom, mapId:'DEMO_MAP_ID',
-    clickableIcons:false, gestureHandling:'greedy', mapTypeControl:false, streetViewControl:false, fullscreenControl:false});
-  const markers = new globalThis.Map();
-  let me = null;
-  return {
-    name:'google',
-    getCenter(){ const c = map.getCenter(); return {lat:c.lat(), lng:c.lng()}; },
-    getView(){ const c = map.getCenter(); return {lat:c.lat(), lng:c.lng(), zoom:map.getZoom()}; },
-    setCenter(p, z){ map.panTo(p); if (z) map.setZoom(z); },
-    onIdle(cb){ map.addListener('idle', cb); },
-    onClick(cb){ map.addListener('click', e => cb(e.latLng.lat(), e.latLng.lng())); },
-    showMe(p){ if (!me){ const d = document.createElement('div'); d.className = 'me'; me = new AdvancedMarkerElement({map, position:p, content:d, zIndex:1}); } else me.position = p; },
-    sync(){
-      const ids = new Set();
-      for (const s of allStores()){
-        ids.add(s.id);
-        let m = markers.get(s.id);
-        if (!m){ m = new AdvancedMarkerElement({map, position:{lat:s.lat, lng:s.lng}, content:pinEl(s), title:s.name}); markers.set(s.id, m); }
-        else m.content = pinEl(s);
-        m.zIndex = s.id === selectedId ? 1000 : (s.handling === 'yes' ? 100 : s.handling === 'unknown' ? 50 : 10);
-      }
-      for (const [id, m] of markers) if (!ids.has(id)){ m.map = null; markers.delete(id); }
-    },
-    async search(){
-      const b = map.getBounds(), c = map.getCenter();
-      const radius = Math.min(Math.max(dist({lat:c.lat(), lng:c.lng()}, {lat:b.getNorthEast().lat(), lng:b.getNorthEast().lng()}), 300), 5000);
-      const {places: res} = await places.Place.searchNearby({
-        fields:['id', 'displayName', 'location', 'formattedAddress'],
-        locationRestriction:{center:c, radius},
-        includedPrimaryTypes:['convenience_store'],
-        maxResultCount:20,
-        rankPreference: places.SearchNearbyRankPreference.DISTANCE,
-        language:'ja', region:'jp',
-      });
-      return (res || []).map(p => ({id:'g:' + p.id, placeId:p.id, name:p.displayName, lat:p.location.lat(), lng:p.location.lng(),
-        address:(p.formattedAddress || '').replace(/^日本、?\s*(〒\d{3}-\d{4}\s*)?/, '')}));
-    },
-  };
-}
-
-// ---------- OpenStreetMap (Leaflet) adapter ----------
-async function osmAdapter(el, view){
-  await new Promise((res, rej) => {
-    const css = document.createElement('link'); css.rel = 'stylesheet'; css.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'; document.head.appendChild(css);
-    const sc = document.createElement('script'); sc.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'; sc.onload = res; sc.onerror = () => rej(new Error('地図ライブラリを読み込めませんでした'));
-    document.head.appendChild(sc);
-  });
-  const map = L.map(el, {zoomControl:true}).setView([view.lat, view.lng], view.zoom);
-  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom:19, attribution:'&copy; OpenStreetMap contributors'}).addTo(map);
-  const markers = new Map(); let me = null;
-  const icon = s => L.divIcon({html:pinHTML(s), className:'', iconSize:[30, 36], iconAnchor:[15, 36]});
-  return {
-    name:'osm',
-    getCenter(){ const c = map.getCenter(); return {lat:c.lat, lng:c.lng}; },
-    getView(){ const c = map.getCenter(); return {lat:c.lat, lng:c.lng, zoom:map.getZoom()}; },
-    setCenter(p, z){ map.setView([p.lat, p.lng], z || map.getZoom()); },
-    onIdle(cb){ map.on('moveend', cb); },
-    onClick(cb){ map.on('click', e => cb(e.latlng.lat, e.latlng.lng)); },
-    showMe(p){ if (!me) me = L.circleMarker([p.lat, p.lng], {radius:8, color:'#fff', weight:3, fillColor:'#2563eb', fillOpacity:1}).addTo(map); else me.setLatLng([p.lat, p.lng]); },
-    sync(){
-      const ids = new Set();
-      for (const s of allStores()){
-        ids.add(s.id);
-        let m = markers.get(s.id);
-        if (!m){ m = L.marker([s.lat, s.lng], {icon:icon(s), title:s.name}).addTo(map); m.on('click', () => select(s.id)); markers.set(s.id, m); }
-        else m.setIcon(icon(s));
-        m.setZIndexOffset(s.id === selectedId ? 1000 : (s.handling === 'yes' ? 100 : 0));
-      }
-      for (const [id, m] of markers) if (!ids.has(id)){ m.remove(); markers.delete(id); }
-    },
-    async search(){
-      if (map.getZoom() < 14) throw new Error('もう少し地図を拡大してから検索してください');
-      const b = map.getBounds(), bb = `${b.getSouth()},${b.getWest()},${b.getNorth()},${b.getEast()}`;
-      const q = `[out:json][timeout:25];(node["shop"="convenience"](${bb});way["shop"="convenience"](${bb}););out center 200;`;
-      const r = await fetch('https://overpass-api.de/api/interpreter', {method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body:'data=' + encodeURIComponent(q)});
-      if (!r.ok) throw new Error('店舗データの取得に失敗しました（少し待って再試行してください）');
+async function fetchStores(){
+  let lastErr;
+  for (const ep of OVERPASS){
+    try {
+      const ctl = new AbortController(); const to = setTimeout(() => ctl.abort(), 200000);
+      const r = await fetch(ep, {method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body:'data=' + encodeURIComponent(QUERY), signal:ctl.signal});
+      clearTimeout(to);
+      if (!r.ok) throw new Error('HTTP ' + r.status);
       const j = await r.json();
-      return j.elements.map(e => {
-        const t = e.tags || {}, lat = e.lat ?? e.center?.lat, lng = e.lon ?? e.center?.lon;
-        const name = [t['name:ja'] || t.name || t.brand || 'コンビニ', t.branch && !String(t.name || '').includes(t.branch) ? t.branch + '店' : ''].filter(Boolean).join(' ');
-        const address = [t['addr:province'], t['addr:city'], t['addr:quarter'], t['addr:neighbourhood'], t['addr:block_number'] || t['addr:housenumber']].filter(Boolean).join('');
-        return {id:`o:${e.type}/${e.id}`, name, lat, lng, address};
-      }).filter(p => p.lat != null);
-    },
-  };
-}
-
-// ---------- list ----------
-function renderList(){
-  const el = $('#list'); if (!el) return;
-  const c = mapA ? mapA.getCenter() : DEFAULT_VIEW;
-  const q = $('#q').value.trim().toLowerCase();
-  let arr = allStores().map(s => ({s, d:dist(c, s)}));
-  arr = arr.filter(({s}) => {
-    if (filter === 'yes' && s.handling !== 'yes') return false;
-    if (filter === 'no' && s.handling !== 'no') return false;
-    if (filter === 'unknown' && s.handling !== 'unknown') return false;
-    if (filter === 'recent' && !isRecent(s)) return false;
-    if (q){ const hay = (s.name + ' ' + s.address + ' ' + s.memo + ' ' + (s.logs || []).map(l => l.memo).join(' ')).toLowerCase(); if (!hay.includes(q)) return false; }
-    return true;
-  }).sort((a, b) => a.d - b.d).slice(0, 150);
-  if (!arr.length){
-    el.innerHTML = `<div class="empty">${allStores().length
-      ? '条件に合う店舗がありません。'
-      : '地図を見たい場所に動かして、上の <b>🔍 周辺のコンビニを探す</b> を押してください。<br>見つからない店舗は <b>＋</b> で手動追加できます。'}</div>`;
-    return;
+      const list = parseOverpass(j);
+      if (!list.length) throw new Error('店舗が0件でした');
+      return list;
+    } catch (e) { lastErr = e; console.warn(ep, e); }
   }
-  el.innerHTML = arr.map(({s, d}) => {
-    const b = brandOf(s.name), last = sortedLogs(s)[0], ls = lastStock(s);
-    const meta = last ? `最終確認 ${fmtWhen(last.at)} <span class="res ${last.result}">${RESULTS[last.result]}</span>` : (s.memo ? esc(s.memo.slice(0, 40)) : esc(s.address));
-    return `<div class="item" data-id="${esc(s.id)}">
-      <div class="bd" style="background:${b.c}">${b.l}</div>
-      <div style="min-width:0"><div class="nm">${esc(s.name)}</div><div class="meta">${meta}</div>
-        ${ls ? `<div class="meta">在庫を見たのは ${ago(ls.at)}（${SLOT[ls.slot]?.l || ''}）</div>` : ''}</div>
-      <div class="right"><span class="tag ${s.handling}">${HANDLING[s.handling]}</span><div style="margin-top:4px">${fmtDist(d)}</div></div>
-    </div>`;
-  }).join('');
+  throw lastErr || new Error('取得できませんでした');
+}
+async function refreshStores(first){
+  showLoading(`<div class="spin"></div><h2>店舗リストを作成中…</h2><p>相模原市・町田市のセブン-イレブン、ローソン、ファミリーマート、ミニストップを集めています。<br>30秒〜1分ほどかかることがあります。</p>`);
+  try {
+    const list = await fetchStores();
+    const before = new Set((cache?.stores || []).map(s => s.id));
+    const added = list.filter(s => !before.has(s.id)).length;
+    cache = {fetchedAt:Date.now(), stores:list};
+    save(CACHE_KEY, cache);
+    hideLoading(); render();
+    toast(first ? `${list.length}店舗の一覧ができました` : `更新しました（${list.length}店舗${added ? `・新しく${added}店舗` : ''}）`, 4000);
+  } catch (e) {
+    showLoading(`<h2>店舗リストを取得できませんでした</h2><p>電波の良い場所で、もう一度試してください。<br><small>（${esc(e.message || e)}）</small></p>
+      <div class="btns"><button class="btn" id="retry">もう一度試す</button>${cache ? '<button class="btn ghost" id="cancelLoad">閉じる</button>' : ''}</div>`);
+    $('#retry').onclick = () => refreshStores(first);
+    if (cache) $('#cancelLoad').onclick = hideLoading;
+  }
+}
+function showLoading(html){ $('#loadingBox').innerHTML = html; $('#loading').hidden = false; }
+function hideLoading(){ $('#loading').hidden = true; }
+
+// ===== 一覧 =====
+function renderChainChips(){
+  $('#fChain').innerHTML = Object.entries(CHAINS).map(([k, c]) =>
+    `<button class="chip ch${ui.chains.includes(k) ? ' on' : ''}" data-k="${k}"><span class="sw" style="background:${c.c}"></span>${c.s}</button>`).join('');
+}
+function areaLabel(s){ return s.city === '相模原市' ? `相模原市${s.ward ? ' ' + s.ward : ''}` : s.city; }
+function filtered(){
+  const q = kana($('#fQ').value.trim());
+  let arr = baseStores().map(view).filter(s => {
+    if (!ui.chains.includes(s.chain)) return false;
+    if (ui.area !== 'all'){
+      if (ui.area === '相模原市' || ui.area === '町田市'){ if (s.city !== ui.area) return false; }
+      else if (s.city + s.ward !== ui.area) return false;
+    }
+    if (ui.status === 'closed') return s.closed;
+    if (s.closed) return false;
+    if (ui.status === 'yes' && s.handling !== 'yes') return false;
+    if (ui.status === 'no' && s.handling !== 'no') return false;
+    if (ui.status === 'unknown' && s.handling !== 'unknown') return false;
+    if (ui.status === 'hot' && !isHot(s)) return false;
+    if (q && !kana([s.name, s.addr, areaLabel(s), s.memo, ...s.logs.map(l => l.memo)].join(' ')).includes(q)) return false;
+    return true;
+  });
+  if (ui.sort === 'near' && here) arr.forEach(s => s.d = dist(here, s));
+  arr.sort((a, b) => {
+    if (ui.sort === 'near' && here) return a.d - b.d;
+    if (ui.sort === 'recent'){ const la = sortedLogs(a)[0]?.at || '', lb = sortedLogs(b)[0]?.at || ''; if (la !== lb) return lb.localeCompare(la); }
+    return a.name.localeCompare(b.name, 'ja') || areaLabel(a).localeCompare(areaLabel(b), 'ja');
+  });
+  return arr;
+}
+function render(){
+  const arr = filtered(), all = baseStores().length;
+  const yes = baseStores().filter(b => rec(b.id).handling === 'yes' && !rec(b.id).closed).length;
+  $('#count').innerHTML = `<span>${arr.length}店舗を表示</span><span>全${all}店舗中 扱いあり ${yes}店</span>`;
+  if (!arr.length){
+    $('#list').innerHTML = `<div class="empty">${all ? '条件に合う店舗がありません。' : '店舗リストがまだありません。'}</div>`;
+  } else {
+    $('#list').innerHTML = arr.slice(0, shown).map(s => {
+      const c = CHAINS[s.chain], last = sortedLogs(s)[0];
+      const sub = last
+        ? `${fmtWhen(last.at)}（${SLOT[last.slot]?.l || ''}） <span class="res ${last.result}">${RESULTS[last.result]}</span>`
+        : esc(s.memo ? s.memo.slice(0, 40) : (s.addr || ''));
+      return `<div class="item" data-id="${esc(s.id)}">
+        <div class="badge" style="background:${c.c}">${c.b}</div>
+        <div style="min-width:0"><div class="nm">${esc(s.name)}</div>
+          <div class="meta">${esc(areaLabel(s))}${s.d != null ? ' ・ ' + fmtDist(s.d) : ''}</div>
+          ${sub ? `<div class="meta">${sub}</div>` : ''}</div>
+        <div class="right"><span class="tag ${s.handling}">${HANDLING[s.handling]}</span>${isHot(s) ? '<span class="tag hot">在庫あり</span>' : ''}</div>
+      </div>`;
+    }).join('') + (arr.length > shown ? `<button class="more" id="more">さらに表示（残り${arr.length - shown}店舗）</button>` : '');
+    const m = $('#more'); if (m) m.onclick = () => { shown += PAGE; render(); };
+  }
+  $('#foot').innerHTML = cache
+    ? `店舗データ：OpenStreetMap（${fmtDate(cache.fetchedAt)} 取得）。一覧にない店舗は右上の＋で追加、閉店した店舗は詳細画面から非表示にできます。`
+    : '';
+}
+$('#list').onclick = e => { const it = e.target.closest('.item'); if (it) openDetail(it.dataset.id); };
+$('#fArea').onchange = e => { ui.area = e.target.value; shown = PAGE; save(UI_KEY, ui); render(); };
+$('#fSort').onchange = e => {
+  ui.sort = e.target.value; save(UI_KEY, ui);
+  if (ui.sort === 'near') locate(); else render();
+};
+$('#fChain').onclick = e => { const b = e.target.closest('.chip'); if (!b) return; const k = b.dataset.k;
+  ui.chains = ui.chains.includes(k) ? ui.chains.filter(x => x !== k) : [...ui.chains, k];
+  if (!ui.chains.length) ui.chains = [k];
+  save(UI_KEY, ui); renderChainChips(); shown = PAGE; render(); };
+$('#fStatus').onclick = e => { const b = e.target.closest('.chip'); if (!b) return; ui.status = b.dataset.f;
+  [...$('#fStatus').children].forEach(c => c.classList.toggle('on', c === b)); save(UI_KEY, ui); shown = PAGE; render(); };
+let qT; $('#fQ').oninput = () => { clearTimeout(qT); qT = setTimeout(() => { shown = PAGE; render(); }, 150); };
+function locate(){
+  if (!navigator.geolocation){ toast('現在地を取得できません'); return render(); }
+  toast('現在地を取得中…');
+  navigator.geolocation.getCurrentPosition(p => { here = {lat:p.coords.latitude, lng:p.coords.longitude}; render(); toast('近い順に並べました'); },
+    () => { toast('現在地を取得できませんでした（位置情報の許可を確認してください）', 4000); render(); },
+    {enableHighAccuracy:true, timeout:12000, maximumAge:60000});
 }
 
-// ---------- detail ----------
-function select(id){
-  selectedId = id; mapA && mapA.sync();
-  const s = getStore(id); if (!s) return back();
-  if (mapA) mapA.setCenter({lat:s.lat, lng:s.lng});
-  renderDetail();
-  $('#listView').hidden = true; $('#detailView').hidden = false; $('#panel').classList.add('tall');
+// ===== 詳細 =====
+let draft = {result:'stock', slot:null};
+function openDetail(id){
+  currentId = id; draft = {result:'stock', slot:slotOfHour(new Date().getHours())};
+  renderDetail(); $('#detail').classList.add('open'); $('#detail').scrollTop = 0;
+  history.pushState({d:1}, '');
 }
-function back(){
-  selectedId = null; mapA && mapA.sync();
-  $('#detailView').hidden = true; $('#listView').hidden = false; $('#panel').classList.remove('tall');
-  renderList();
+function closeDetail(fromPop){
+  $('#detail').classList.remove('open'); currentId = null; render();
+  if (!fromPop && history.state?.d) history.back();
 }
-let draftResult = 'stock';
+window.addEventListener('popstate', () => { if (currentId) closeDetail(true); });
 function renderDetail(){
-  const s = getStore(selectedId); if (!s) return back();
-  const b = brandOf(s.name), logs = sortedLogs(s);
-  const gUrl = s.placeId
-    ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(s.name)}&query_place_id=${encodeURIComponent(s.placeId)}`
-    : `https://www.google.com/maps/search/?api=1&query=${s.lat},${s.lng}`;
+  const s = byId(currentId); if (!s) return closeDetail();
+  const c = CHAINS[s.chain], logs = sortedLogs(s);
+  const gUrl = `https://www.google.com/maps/search/?api=1&query=${s.lat},${s.lng}`;
   const cnt = Object.fromEntries(SLOTS.map(x => [x.k, {stock:0, soldout:0}]));
-  for (const l of logs) if (cnt[l.slot] && (l.result === 'stock' || l.result === 'soldout')) cnt[l.slot][l.result]++;
+  for (const l of logs) if (cnt[l.slot] && l.result !== 'none') cnt[l.slot][l.result]++;
   const max = Math.max(1, ...SLOTS.map(x => cnt[x.k].stock + cnt[x.k].soldout));
   const best = Math.max(...SLOTS.map(x => cnt[x.k].stock));
   const now = new Date();
-  $('#detailView').innerHTML = `
-    <div class="dhead">
-      <button class="back" id="dBack">← 一覧に戻る</button>
-      <div class="dname"><span class="bd" style="background:${b.c};width:26px;height:26px;border-radius:50%;display:inline-grid;place-items:center;color:#fff;font-size:12px;flex:none">${b.l}</span>${esc(s.name)}</div>
-      <div class="daddr">${esc(s.address || '')}</div>
-      <div class="dlinks"><a href="${gUrl}" target="_blank" rel="noopener">Googleマップで開く ↗</a><button id="dRename">店名を編集</button></div>
+  $('#detail').innerHTML = `
+    <div class="dhead"><button class="back" id="dBack">‹ 一覧へ</button></div>
+    <div class="dinfo">
+      <div class="dname"><span class="badge" style="background:${c.c}">${c.b}</span><span>${esc(s.name)}</span></div>
+      <div class="dsub">${esc(areaLabel(s))}${s.addr ? '　' + esc(s.addr) : ''}${here ? `　現在地から${fmtDist(dist(here, s))}` : ''}${s.closed ? '<br><b style="color:var(--accent)">非表示中の店舗です</b>' : ''}</div>
+      <div class="dlinks"><a href="${gUrl}" target="_blank" rel="noopener">Googleマップで場所を見る ↗</a><button id="dRename">店名を編集</button></div>
     </div>
-    <div class="scroll">
-      <div class="sec"><h3>ポケモンカードの扱い</h3>
-        <div class="seg" id="segH">${['yes', 'no', 'unknown'].map(k => `<button data-k="${k}" class="${k}${s.handling === k ? ' on' : ''}">${HANDLING[k]}</button>`).join('')}</div>
-      </div>
-      <div class="sec"><h3>販売を確認した記録を追加</h3>
-        <div class="seg" id="segR" style="margin-bottom:8px">${Object.entries(RESULTS).map(([k, v]) => `<button data-k="${k}" class="${k}${draftResult === k ? ' on' : ''}">${v}</button>`).join('')}</div>
-        <div class="row">
-          <input type="datetime-local" class="txt" id="fAt" value="${localISO(now)}">
-          <select class="txt" id="fSlot" style="flex:.7">${SLOTS.map(x => `<option value="${x.k}"${x.k === slotOfHour(now.getHours()) ? ' selected' : ''}>${x.l}（${x.r}）</option>`).join('')}</select>
-        </div>
-        <textarea class="txt" id="fMemo" placeholder="例：レジ横に151が3パック、1人1パック制限、10時ごろ品出し"></textarea>
-        <div style="height:8px"></div>
-        <button class="btn" id="fAdd">記録する</button>
-      </div>
-      <div class="sec"><h3>時間帯別に見た回数</h3>
-        <div class="slots">${SLOTS.map(x => { const c = cnt[x.k], tot = c.stock + c.soldout;
-          return `<div class="slot${best > 0 && c.stock === best ? ' best' : ''}" title="在庫あり ${c.stock}回 / 売り切れ ${c.soldout}回">
-            <div class="bar"><i class="so" style="height:${tot / max * 100}%"></i><i style="height:${c.stock / max * 100}%"></i></div>
-            <b>${c.stock}</b>${x.l}</div>`; }).join('')}</div>
-        <div class="hint">緑＝在庫ありを見た回数、薄い赤＝売り切れだった回数。${best > 0 ? `<b>${SLOTS.filter(x => cnt[x.k].stock === best).map(x => x.l).join('・')}</b>に在庫を見たことが一番多いです。` : '記録が増えると狙い目の時間帯がわかります。'}</div>
-      </div>
-      <div class="sec"><h3>店舗メモ</h3>
-        <textarea class="txt" id="sMemo" placeholder="例：入荷は火・金。店員さんに聞けば教えてくれる。駐車場あり">${esc(s.memo)}</textarea>
-        <div class="hint" id="sMemoHint">入力すると自動で保存されます</div>
-      </div>
-      <div class="sec"><h3>確認履歴（${logs.length}件）</h3>
-        ${logs.length ? logs.map(l => `<div class="log">
-            <div class="when">${fmtWhen(l.at)}<br><small>${SLOT[l.slot]?.l || ''}</small></div>
-            <div style="min-width:0"><span class="res ${l.result}">${RESULTS[l.result]}</span>${l.memo ? `<div class="memo">${esc(l.memo)}</div>` : ''}</div>
-            <button class="del" data-log="${esc(l.id)}" title="この記録を削除">×</button></div>`).join('')
-          : '<div class="hint" style="margin:0">まだ記録がありません</div>'}
-      </div>
-      <div class="sec" style="border-bottom:0"><button class="btn danger" id="dDelete">この店舗の記録をすべて削除</button></div>
+
+    <div class="sec"><h3>ポケモンカードの扱い</h3>
+      <div class="seg" id="segH">${['yes','no','unknown'].map(k => `<button data-k="${k}" class="${k}${s.handling === k ? ' on' : ''}">${HANDLING[k]}</button>`).join('')}</div>
+    </div>
+
+    <div class="sec"><h3>販売を確認した記録を追加</h3>
+      <div class="seg" id="segR">${Object.entries(RESULTS).map(([k, v]) => `<button data-k="${k}" class="${k}${draft.result === k ? ' on' : ''}">${v}</button>`).join('')}</div>
+      <div class="lbl">時間帯</div>
+      <div class="slotpick" id="slotPick">${SLOTS.map(x => `<button data-k="${x.k}" class="${draft.slot === x.k ? 'on' : ''}">${x.l}<small>${x.r}</small></button>`).join('')}</div>
+      <div class="lbl">日時</div>
+      <input type="datetime-local" class="txt" id="fAt" value="${localISO(now)}">
+      <div class="lbl">メモ</div>
+      <textarea class="txt" id="fMemo" placeholder="例：レジ横に3パック、1人1パックまで、10時ごろ品出し"></textarea>
+      <div style="height:10px"></div>
+      <button class="btn" id="fAdd">記録する</button>
+    </div>
+
+    <div class="sec"><h3>時間帯別の記録</h3>
+      <div class="slots">${SLOTS.map(x => { const v = cnt[x.k], tot = v.stock + v.soldout;
+        return `<div class="slot${best > 0 && v.stock === best ? ' best' : ''}">
+          <div class="bar"><i class="so" style="height:${tot/max*100}%"></i><i style="height:${v.stock/max*100}%"></i></div>
+          <b>${v.stock}</b>${x.l}</div>`; }).join('')}</div>
+      <div class="hint">数字と緑＝在庫ありを見た回数、薄い赤＝売り切れだった回数。${best > 0 ? `<b>${SLOTS.filter(x => cnt[x.k].stock === best).map(x => x.l).join('・')}</b>に在庫を見たことが一番多いです。` : '記録が増えると狙い目の時間帯がわかります。'}</div>
+    </div>
+
+    <div class="sec"><h3>店舗メモ</h3>
+      <textarea class="txt" id="sMemo" placeholder="例：入荷は火・金曜。店員さんに聞けば教えてくれる">${esc(s.memo)}</textarea>
+      <div class="hint" id="sMemoHint">入力すると自動で保存されます</div>
+    </div>
+
+    <div class="sec"><h3>確認履歴（${logs.length}件）</h3>
+      ${logs.length ? logs.map(l => `<div class="log">
+        <div class="when">${fmtWhen(l.at)}<br>${SLOT[l.slot]?.l || ''}</div>
+        <div style="min-width:0"><span class="res ${l.result}">${RESULTS[l.result]}</span>${l.memo ? `<div class="memo">${esc(l.memo)}</div>` : ''}</div>
+        <button class="del" data-log="${esc(l.id)}" aria-label="削除">×</button></div>`).join('') : '<div class="hint" style="margin:0">まだ記録がありません</div>'}
+    </div>
+
+    <div class="sec" style="margin-bottom:calc(30px + env(safe-area-inset-bottom))">
+      <button class="btn ghost" id="dHide">${s.closed ? 'この店舗を一覧に戻す' : '閉店・重複などで一覧から非表示にする'}</button>
+      ${String(s.id).startsWith('m:') ? '<div style="height:8px"></div><button class="btn danger" id="dDelete">手動追加したこの店舗を削除</button>' : ''}
     </div>`;
 
-  $('#dBack').onclick = back;
-  $('#segH').onclick = e => { const k = e.target.dataset.k; if (!k) return; s.handling = k; commit(s); renderDetail(); };
-  $('#segR').onclick = e => { const k = e.target.dataset.k; if (!k) return; draftResult = k;
+  $('#dBack').onclick = () => closeDetail();
+  $('#segH').onclick = e => { const k = e.target.closest('button')?.dataset.k; if (!k) return; updateRec(s.id, r => r.handling = k); renderDetail(); };
+  $('#segR').onclick = e => { const k = e.target.closest('button')?.dataset.k; if (!k) return; draft.result = k;
     [...$('#segR').children].forEach(b => b.classList.toggle('on', b.dataset.k === k)); };
-  $('#fAt').onchange = e => { const d = new Date(e.target.value); if (!isNaN(d)) $('#fSlot').value = slotOfHour(d.getHours()); };
+  $('#slotPick').onclick = e => { const k = e.target.closest('button')?.dataset.k; if (!k) return; draft.slot = k;
+    [...$('#slotPick').children].forEach(b => b.classList.toggle('on', b.dataset.k === k)); };
+  $('#fAt').onchange = e => { const d = new Date(e.target.value); if (!isNaN(d)){ draft.slot = slotOfHour(d.getHours());
+    [...$('#slotPick').children].forEach(b => b.classList.toggle('on', b.dataset.k === draft.slot)); } };
   $('#fAdd').onclick = () => {
-    const at = $('#fAt').value || localISO(new Date());
-    s.logs = s.logs || [];
-    s.logs.push({id:uid(), at, slot:$('#fSlot').value, result:draftResult, memo:$('#fMemo').value.trim()});
-    if (s.handling === 'unknown' && (draftResult === 'stock' || draftResult === 'soldout')) s.handling = 'yes';
-    commit(s); renderDetail(); toast('記録しました');
+    const at = $('#fAt').value || localISO(new Date()), memo = $('#fMemo').value.trim();
+    updateRec(s.id, r => {
+      r.logs = r.logs || []; r.logs.push({id:uid(), at, slot:draft.slot, result:draft.result, memo});
+      if ((r.handling || 'unknown') === 'unknown' && draft.result !== 'none') r.handling = 'yes';
+    });
+    renderDetail(); toast('記録しました');
   };
-  let memoT;
-  $('#sMemo').oninput = e => { clearTimeout(memoT); memoT = setTimeout(() => { s.memo = e.target.value; commit(s); $('#sMemoHint').textContent = '保存しました'; }, 400); };
-  $('#detailView').querySelectorAll('.del').forEach(btn => btn.onclick = () => {
-    confirmBox('この記録を削除しますか？', () => { s.logs = s.logs.filter(l => l.id !== btn.dataset.log); commit(s); renderDetail(); });
-  });
-  $('#dRename').onclick = () => nameBox('店名を編集', s.name, v => { s.name = v; commit(s); renderDetail(); });
-  $('#dDelete').onclick = () => confirmBox(`「${s.name}」の扱い・メモ・履歴をすべて削除しますか？${s.custom ? '（手動追加した店舗なので地図からも消えます）' : ''}`, () => {
-    delete db.stores[s.id];
-    if (s.custom) delete found[s.id];
-    else found[s.id] = newStore(s);
-    store(DATA_KEY, db); back(); mapA.sync(); toast('削除しました');
-  });
+  let mT;
+  $('#sMemo').oninput = e => { clearTimeout(mT); mT = setTimeout(() => { updateRec(s.id, r => r.memo = e.target.value); $('#sMemoHint').textContent = '保存しました'; }, 400); };
+  $('#detail').querySelectorAll('.del').forEach(b => b.onclick = () => confirmBox('この記録を削除しますか？', () => {
+    updateRec(s.id, r => r.logs = r.logs.filter(l => l.id !== b.dataset.log)); renderDetail(); }));
+  $('#dRename').onclick = () => promptBox('店名を編集', s.name, v => {
+    if (String(s.id).startsWith('m:')) { db.manual[s.id].name = v; save(DATA_KEY, db); }
+    else updateRec(s.id, r => r.customName = v);
+    renderDetail(); });
+  $('#dHide').onclick = () => { updateRec(s.id, r => r.closed = !s.closed); toast(s.closed ? '一覧に戻しました' : '非表示にしました（「非表示にした店」で確認できます）', 3500); renderDetail(); };
+  const del = $('#dDelete');
+  if (del) del.onclick = () => confirmBox(`「${s.name}」と記録を削除しますか？`, () => {
+    delete db.manual[s.id]; delete db.recs[s.id]; save(DATA_KEY, db); closeDetail(); toast('削除しました'); });
 }
 
-// ---------- modals ----------
-function openModal(html){ $('#mbox').innerHTML = html; $('#modal').hidden = false; }
+// ===== ダイアログ =====
+function openModal(h){ $('#mbox').innerHTML = h; $('#modal').hidden = false; }
 function closeModal(){ $('#modal').hidden = true; }
-$('#modal').addEventListener('click', e => { if (e.target.id === 'modal' && cfg.engine) closeModal(); });
+$('#modal').onclick = e => { if (e.target.id === 'modal') closeModal(); };
 function confirmBox(msg, ok){
   openModal(`<p style="font-size:15px">${esc(msg)}</p><div class="btns"><button class="btn ghost" id="mNo">キャンセル</button><button class="btn" id="mYes">OK</button></div>`);
   $('#mNo').onclick = closeModal; $('#mYes').onclick = () => { closeModal(); ok(); };
 }
-function nameBox(title, val, ok){
-  openModal(`<h2>${esc(title)}</h2><input class="txt" id="mName" value="${esc(val)}" placeholder="例：セブン-イレブン 〇〇駅前店">
-    <div class="btns"><button class="btn ghost" id="mNo">キャンセル</button><button class="btn" id="mYes">OK</button></div>`);
-  const i = $('#mName'); i.focus(); i.select();
-  const go = () => { const v = i.value.trim(); if (!v) return i.focus(); closeModal(); ok(v); };
+function promptBox(title, val, ok){
+  openModal(`<h2>${esc(title)}</h2><input class="txt" id="mIn" value="${esc(val)}"><div class="btns"><button class="btn ghost" id="mNo">キャンセル</button><button class="btn" id="mYes">保存</button></div>`);
+  const i = $('#mIn'); i.focus();
+  const go = () => { const v = i.value.trim(); if (!v) return; closeModal(); ok(v); };
   $('#mNo').onclick = closeModal; $('#mYes').onclick = go; i.onkeydown = e => { if (e.key === 'Enter') go(); };
 }
-function settings(first){
-  const n = Object.keys(db.stores).length;
-  openModal(`
-    <h2>${first ? 'はじめに：地図の設定' : '設定'}</h2>
-    <label>使う地図</label>
-    <div class="radio">
-      <label><input type="radio" name="eng" value="google" ${cfg.engine !== 'osm' ? 'checked' : ''}><span>Googleマップ<small>APIキーが必要。店舗検索の精度が高い</small></span></label>
-      <label><input type="radio" name="eng" value="osm" ${cfg.engine === 'osm' ? 'checked' : ''}><span>OpenStreetMap<small>キー不要ですぐ使える。店舗情報はやや少なめ</small></span></label>
-    </div>
-    <label for="mKey">Google Maps APIキー</label>
-    <input class="txt" id="mKey" value="${esc(cfg.key)}" placeholder="AIza...">
-    <p>キーの取り方：</p>
-    <ol>
-      <li><a href="https://console.cloud.google.com/" target="_blank" rel="noopener">Google Cloud Console</a> でプロジェクトを作成（請求先アカウントの登録が必要）</li>
-      <li>「APIとサービス」→ <b>Maps JavaScript API</b> と <b>Places API (New)</b> を有効にする</li>
-      <li>「認証情報」→「APIキーを作成」。キーの制限で上の2つのAPIだけに絞っておくと安心です</li>
-    </ol>
-    <p>キーはこのブラウザの中にだけ保存されます。</p>
-    <div class="btns"><button class="btn" id="mSave">保存して地図を開く</button></div>
-    ${first ? '' : `<hr>
-    <h2 style="font-size:15px">データのバックアップ</h2>
-    <p>記録（${n}店舗）はこのブラウザの中に保存されています。別の端末に移すときやブラウザのデータを消す前に書き出してください。</p>
-    <div class="btns"><button class="btn ghost" id="mExport">書き出す (JSON)</button><button class="btn ghost" id="mImport">読み込む</button></div>
-    <div class="btns"><button class="btn ghost" id="mClose">閉じる</button></div>`}
-  `);
-  $('#mSave').onclick = () => {
-    const eng = document.querySelector('input[name=eng]:checked').value, key = $('#mKey').value.trim();
-    if (eng === 'google' && !key){ toast('Googleマップを使うにはAPIキーを入力してください'); return; }
-    const changed = eng !== cfg.engine || key !== cfg.key;
-    cfg.engine = eng; cfg.key = key; if (mapA) cfg.view = mapA.getView(); store(CFG_KEY, cfg);
-    if (changed) location.reload(); else closeModal();
+$('#btnAdd').onclick = () => {
+  openModal(`<h2>店舗を追加</h2>
+    <p>一覧に見つからない店舗を登録します。</p>
+    <label>チェーン</label>
+    <select class="txt" id="aChain">${Object.entries(CHAINS).map(([k, c]) => `<option value="${k}">${c.l}</option>`).join('')}</select>
+    <label>店名</label>
+    <input class="txt" id="aName" placeholder="例：相模大野駅前店">
+    <label>地域</label>
+    <select class="txt" id="aArea"><option value="相模原市|緑区">相模原市 緑区</option><option value="相模原市|中央区">相模原市 中央区</option><option value="相模原市|南区">相模原市 南区</option><option value="町田市|">町田市</option></select>
+    <label>住所（任意）</label>
+    <input class="txt" id="aAddr" placeholder="例：南区相模大野3-1-1">
+    <label style="display:flex;gap:8px;align-items:center;font-weight:600"><input type="checkbox" id="aHere" style="width:20px;height:20px"> 今いる場所を店舗の位置にする（近い順で使います）</label>
+    <div class="btns"><button class="btn ghost" id="mNo">キャンセル</button><button class="btn" id="mYes">追加</button></div>`);
+  $('#mNo').onclick = closeModal;
+  $('#mYes').onclick = () => {
+    const ch = $('#aChain').value; let nm = $('#aName').value.trim();
+    if (!nm) return toast('店名を入力してください');
+    if (!CHAINS[ch].re.test(nm)) nm = `${CHAINS[ch].l} ${nm}`;
+    const [city, ward] = $('#aArea').value.split('|');
+    const st = {id:'m:' + uid(), chain:ch, name:nm, city, ward, addr:$('#aAddr').value.trim(),
+      lat:city === '町田市' ? 35.5466 : 35.5711, lng:city === '町田市' ? 139.4386 : 139.3735, noPos:true};
+    const finish = () => { db.manual[st.id] = st; save(DATA_KEY, db); closeModal(); render(); toast('追加しました'); openDetail(st.id); };
+    if ($('#aHere').checked && navigator.geolocation){
+      navigator.geolocation.getCurrentPosition(p => { st.lat = p.coords.latitude; st.lng = p.coords.longitude; st.noPos = false; finish(); },
+        () => { toast('現在地を取得できなかったので位置なしで追加します'); finish(); }, {enableHighAccuracy:true, timeout:12000});
+    } else finish();
   };
-  if (!first){
-    $('#mClose').onclick = closeModal;
-    $('#mExport').onclick = exportData;
-    $('#mImport').onclick = () => $('#importFile').click();
-  }
-}
-function exportData(){
-  const blob = new Blob([JSON.stringify(db, null, 2)], {type:'application/json'});
-  const a = document.createElement('a'); const d = new Date();
-  a.href = URL.createObjectURL(blob); a.download = `pokeca-conbini-${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}.json`;
-  document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+};
+
+// ===== 設定・バックアップ =====
+$('#btnSettings').onclick = () => {
+  const nrec = Object.keys(db.recs).length, nman = Object.keys(db.manual).length;
+  openModal(`<h2>設定</h2>
+    <p>店舗リスト：${cache ? `${cache.stores.length}店舗（${fmtDate(cache.fetchedAt)} 取得）` : 'なし'}</p>
+    <div class="btns"><button class="btn ghost" id="sRefresh">店舗リストを最新に更新</button></div>
+    <p class="hint">更新しても、扱い・履歴・メモは消えません。</p>
+    <hr>
+    <h2 style="font-size:15px">記録のバックアップ</h2>
+    <p>記録（${nrec}店舗${nman ? `・手動追加${nman}店舗` : ''}）はこのスマホの中にだけ保存されています。機種変更の前などに書き出してください。</p>
+    <div class="btns"><button class="btn ghost" id="sExport">書き出す</button><button class="btn ghost" id="sImport">読み込む</button></div>
+    <div class="btns"><button class="btn" id="sClose">閉じる</button></div>`);
+  $('#sClose').onclick = closeModal;
+  $('#sRefresh').onclick = () => { closeModal(); refreshStores(false); };
+  $('#sExport').onclick = exportData;
+  $('#sImport').onclick = () => $('#importFile').click();
+};
+async function exportData(){
+  const text = JSON.stringify(db), d = new Date();
+  const name = `pokeca-backup-${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}.json`;
+  const file = new File([text], name, {type:'application/json'});
+  try {
+    if (navigator.canShare && navigator.canShare({files:[file]})) { await navigator.share({files:[file], title:name}); return; }
+  } catch (e) { if (e.name === 'AbortError') return; }
+  const a = document.createElement('a'); a.href = URL.createObjectURL(file); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
 }
 $('#importFile').onchange = async e => {
   const f = e.target.files[0]; e.target.value = ''; if (!f) return;
   try {
-    const j = JSON.parse(await f.text()); if (!j.stores) throw 0;
-    let n = 0;
-    for (const [id, inc] of Object.entries(j.stores)){
-      const cur = db.stores[id];
-      if (!cur){ db.stores[id] = inc; n++; continue; }
-      const logIds = new Set(cur.logs.map(l => l.id));
-      for (const l of inc.logs || []) if (!logIds.has(l.id)) cur.logs.push(l);
-      if ((inc.updatedAt || 0) > (cur.updatedAt || 0)){ cur.handling = inc.handling; cur.memo = inc.memo; cur.name = inc.name; }
-      n++;
+    const j = JSON.parse(await f.text()); if (!j.recs) throw 0;
+    for (const [id, inc] of Object.entries(j.recs)){
+      const cur = db.recs[id];
+      if (!cur){ db.recs[id] = inc; continue; }
+      const ids = new Set((cur.logs || []).map(l => l.id));
+      cur.logs = [...(cur.logs || []), ...(inc.logs || []).filter(l => !ids.has(l.id))];
+      if ((inc.updatedAt || 0) > (cur.updatedAt || 0)) Object.assign(cur, {handling:inc.handling, memo:inc.memo, customName:inc.customName, closed:inc.closed});
     }
-    store(DATA_KEY, db); mapA.sync(); renderList(); closeModal(); toast(`${n}店舗のデータを読み込みました`);
+    Object.assign(db.manual, j.manual || {});
+    save(DATA_KEY, db); closeModal(); render(); toast('バックアップを読み込みました');
   } catch { toast('読み込めないファイルです'); }
 };
 
-// ---------- header actions ----------
-$('#btnSearch').onclick = async () => {
-  if (!mapA) return;
-  const btn = $('#btnSearch'); btn.disabled = true; btn.style.opacity = .6;
-  try {
-    const res = await mapA.search();
-    const added = mergeFound(res);
-    mapA.sync(); renderList();
-    toast(res.length ? `${res.length}件のコンビニが見つかりました${added ? `（新規 ${added}件）` : ''}` : 'この範囲ではコンビニが見つかりませんでした');
-  } catch (err) {
-    console.error(err);
-    toast(err?.message?.includes('Places') || mapA.name === 'google'
-      ? '検索に失敗しました。Places API (New) が有効か確認してください'
-      : (err.message || '検索に失敗しました'), 5000);
-  } finally { btn.disabled = false; btn.style.opacity = 1; }
-};
-$('#btnLocate').onclick = () => {
-  if (!navigator.geolocation) return toast('この環境では現在地を取得できません');
-  navigator.geolocation.getCurrentPosition(
-    p => { const c = {lat:p.coords.latitude, lng:p.coords.longitude}; mapA.setCenter(c, 16); mapA.showMe(c); },
-    () => toast('現在地を取得できませんでした（位置情報の許可を確認してください）'),
-    {enableHighAccuracy:true, timeout:10000});
-};
-$('#btnAdd').onclick = () => { addMode = !addMode; $('#btnAdd').classList.toggle('on', addMode); $('#addBanner').hidden = !addMode; };
-$('#btnSettings').onclick = () => settings(false);
-$('#filters').onclick = e => { const f = e.target.dataset.f; if (!f) return; filter = f;
-  [...$('#filters').children].forEach(c => c.classList.toggle('on', c.dataset.f === f)); renderList(); };
-$('#q').oninput = renderList;
-$('#list').onclick = e => { const it = e.target.closest('.item'); if (it) select(it.dataset.id); };
-
-// ---------- boot ----------
-async function boot(){
-  if (!cfg.engine){ settings(true); return; }
-  const view = cfg.view || DEFAULT_VIEW;
-  try {
-    mapA = cfg.engine === 'google' ? await googleAdapter($('#map'), view, cfg.key) : await osmAdapter($('#map'), view);
-  } catch (err) {
-    console.error(err); toast(err.message || '地図を読み込めませんでした', 6000);
-    settings(false); return;
-  }
-  let saveT;
-  mapA.onIdle(() => { clearTimeout(saveT); saveT = setTimeout(() => { cfg.view = mapA.getView(); store(CFG_KEY, cfg); if (!selectedId) renderList(); }, 300); });
-  mapA.onClick((lat, lng) => {
-    if (!addMode) return;
-    addMode = false; $('#btnAdd').classList.remove('on'); $('#addBanner').hidden = true;
-    nameBox('店舗を追加', '', name => {
-      const s = newStore({id:'m:' + uid(), name, lat, lng, custom:true});
-      db.stores[s.id] = s; commit(s); select(s.id); toast('店舗を追加しました');
-    });
-  });
-  mapA.sync(); renderList();
-}
-boot();
-if ('serviceWorker' in navigator && location.protocol === 'https:') {
-  navigator.serviceWorker.register('sw.js').catch(() => {});
-}
+// ===== 起動 =====
+$('#fArea').value = ui.area; $('#fSort').value = ui.sort === 'near' ? 'name' : ui.sort; if (ui.sort === 'near') ui.sort = 'name';
+[...$('#fStatus').children].forEach(c => c.classList.toggle('on', c.dataset.f === ui.status));
+renderChainChips();
+render();
+if (!cache) refreshStores(true);
+if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
 })();
 </script>
 </body>
